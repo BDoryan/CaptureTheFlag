@@ -1,0 +1,7 @@
+main: doryanbessiere.capturetheflag.minecraft.CaptureTheFlag
+name: CaptureTheFlag
+version: 0.0.1
+author: Doryqn
+commands:
+  ctfdebug:
+  capturetheflag:
