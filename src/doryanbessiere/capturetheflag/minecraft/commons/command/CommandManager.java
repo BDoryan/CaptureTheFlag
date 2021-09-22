@@ -14,7 +14,9 @@ public abstract class CommandManager {
 
     public CommandManager(JavaPlugin plugin) {
         this.plugin = plugin;
+    }
 
+    public void defaultCommand(){
         setCommand(new SimpleCommand(plugin.getName()) {
             @Override
             public boolean onExecute(CommandSender sender, String[] arguments) {

@@ -3,5 +3,5 @@ name: CaptureTheFlag
 version: 0.0.1
 author: Doryqn
 commands:
-  ctfdebug:
-  capturetheflag:
+  ctf:
+  tc:

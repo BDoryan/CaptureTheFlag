@@ -1,21 +1,61 @@
 package doryanbessiere.capturetheflag.minecraft.team;
 
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.scoreboard.NameTagVisibility;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public enum Team {
 
     RED("§c", "§7[§cRouge§7]"),
-    BLUE("§9", "§7[§bBlue§7]");
+    BLUE("§9",  "§7[§bBlue§7]");
 
     private String nameColor;
     private String prefix;
+
+    private org.bukkit.scoreboard.Team team;
+
     private ArrayList<GamePlayer> players = new ArrayList<>();
 
     Team(String nameColor, String prefix) {
         this.nameColor = nameColor;
         this.prefix = prefix;
+    }
+
+    public org.bukkit.scoreboard.Team getScoreboardTeam(){
+        String teamName = toString().toLowerCase();
+
+        Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        org.bukkit.scoreboard.Team scoreboardTeam = mainScoreboard.getTeam(teamName);
+
+        if (scoreboardTeam == null) {
+            mainScoreboard.registerNewTeam(teamName);
+            scoreboardTeam = mainScoreboard.getTeam(teamName);
+            scoreboardTeam.setNameTagVisibility(NameTagVisibility.ALWAYS);
+            scoreboardTeam.setPrefix(getNameColor());
+        }
+        return scoreboardTeam;
+    }
+
+    public void clearPlayers(){
+        getScoreboardTeam().unregister();
+    }
+
+    /**
+     * Puts the player in a team that is the least filled
+     *
+     * @param player
+     */
+    public static void logicTeam(GamePlayer player) {
+        if(Team.RED.getPlayers().size() < Team.BLUE.getPlayers().size()){
+            Team.RED.addPlayer(player);
+        } else {
+            Team.BLUE.addPlayer(player);
+        }
     }
 
     public ArrayList<GamePlayer> getPlayers() {
@@ -24,6 +64,8 @@ public enum Team {
 
     public void addPlayer(GamePlayer player){
         players.add(player);
+        //getScoreboardTeam().addPlayer(player.getPlayer());
+
         player.setTeam(this);
     }
 
@@ -33,6 +75,8 @@ public enum Team {
 
     public void removePlayer(GamePlayer player){
         players.remove(player);
+        //getScoreboardTeam().removePlayer(player.getPlayer());
+
         player.setTeam(null);
     }
 
