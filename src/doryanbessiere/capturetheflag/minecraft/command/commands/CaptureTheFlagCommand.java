@@ -4,6 +4,7 @@ import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.Commons;
 import doryanbessiere.capturetheflag.minecraft.commons.command.SimpleCommand;
 import doryanbessiere.capturetheflag.minecraft.commons.config.ConfigurationUtils;
+import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.listener.listeners.LoggerListener;
 import doryanbessiere.capturetheflag.minecraft.map.Map;
@@ -80,6 +81,7 @@ public class CaptureTheFlagCommand extends SimpleCommand {
         } else if(arguments.length == 2) {
             /**
              * - /ctf map list
+             * - /ctf map wand
              */
             String arg1 = arguments[0];
             String arg2 = arguments[1];
@@ -96,8 +98,16 @@ public class CaptureTheFlagCommand extends SimpleCommand {
                         sender.sendMessage("  §6» §c"+map.getName());
                     }
                     sender.sendMessage("");
-                } else {
-                    CaptureTheFlag.sendMessage(sender, "§cCommande inconnue, essayer: §e/ctf help");
+                } else if(arg2.equalsIgnoreCase("wand")){
+                    if(!(sender instanceof Player)) {
+                        CaptureTheFlag.sendMessage(sender, "§cVous devez être un joueur!");
+                        return false;
+                    }
+                    Player player = (Player) sender;
+
+                    player.getInventory().addItem(GameManager.WAND);
+                    CaptureTheFlag.sendMessage(player, "§fCette outil permet de sélectionner une zone");
+                    CaptureTheFlag.sendMessage(player, "§8» §7Vous devez sélectionner un point A (clic-droit) et un point gauche B (clic-gauche)");
                 }
             } else {
                 CaptureTheFlag.sendMessage(sender, "§cCommande inconnue, essayer: §e/ctf help");
@@ -109,6 +119,7 @@ public class CaptureTheFlagCommand extends SimpleCommand {
              * - /ctf map teleport <map>
              * - /ctf map setspawn <blue|red>
              * - /ctf map setflaf <blue|red>
+             * - /ctf map setzone <blue|red>
              */
             String arg1 = arguments[0];
             String arg2 = arguments[1];
@@ -135,7 +146,7 @@ public class CaptureTheFlagCommand extends SimpleCommand {
                         if(map != null){
                             map.getSpawns().put(team, player.getLocation());
                             map.save();
-                            CaptureTheFlag.sendMessage(sender, "§aVous avez bien défini le point d'apparition de l'équipe "+team.getNameColor()+team.toString().toLowerCase()+"§a.");
+                            CaptureTheFlag.sendMessage(sender, "§aVous avez bien défini le point d'apparition de l'équipe "+team.getNameColor()+team.getName()+"§a.");
                         } else {
                             CaptureTheFlag.sendMessage(sender, "§cCette map n'existe pas !");
                         }
@@ -158,10 +169,38 @@ public class CaptureTheFlagCommand extends SimpleCommand {
                             if(block.getType() == Material.STANDING_BANNER){
                                 map.getFlags().put(team, player.getLocation());
                                 map.save();
-                                CaptureTheFlag.sendMessage(sender, "§aVous avez bien défini le l'emplacement du drapeau de l'équipe "+team.getNameColor()+team.toString().toLowerCase()+"§a.");
+                                CaptureTheFlag.sendMessage(sender, "§aVous avez bien défini le l'emplacement du drapeau de l'équipe "+team.getNameColor()+team.getName()+"§a.");
                             } else {
                                 CaptureTheFlag.sendMessage(sender, "§cVous devez être placé sur un le bloc où est placé la bannière! §7(bloc actuel : "+ block.getType()+")");
                             }
+                        } else {
+                            CaptureTheFlag.sendMessage(sender, "§cCette map n'existe pas !");
+                        }
+                    } else {
+                        CaptureTheFlag.sendMessage(sender, "§cCette équipe n'existe pas !");
+                    }
+                } else if(arg2.equalsIgnoreCase("setarea")){
+                    if(!(sender instanceof Player)) {
+                        CaptureTheFlag.sendMessage(sender, "§cVous devez être un joueur!");
+                        return false;
+                    }
+
+                    Player player = (Player) sender;
+                    Team team = Team.fromName(arg3);
+                    if(team != null){
+                        String mapName = player.getLocation().getWorld().getName();
+                        Map map = MapManager.getMap(mapName);
+                        if(map != null){
+                            Location position1 = GameManager.getPosition1().get(player);
+                            Location position2 = GameManager.getPosition2().get(player);
+
+                            position1.getBlock().setType(Material.AIR);
+                            position2.getBlock().setType(Material.AIR);
+
+                            map.getAreas().put(team, new Cuboid(position1, position2));
+                            map.save();
+
+                            CaptureTheFlag.sendMessage(sender, "§aVous avez défini la zone d'apparition pour l'équipe "+team.getNameColor()+team.getName()+"§a.");
                         } else {
                             CaptureTheFlag.sendMessage(sender, "§cCette map n'existe pas !");
                         }
@@ -230,8 +269,15 @@ public class CaptureTheFlagCommand extends SimpleCommand {
     @Override
     public void onHelp(CommandSender sender) {
         sender.sendMessage(Commons.lineSeparator("CaptureTheFlag"));
-        sender.sendMessage("  §7- /ctf map §7<add|list|remove|teleport>");
-        sender.sendMessage("    §fPermet de voir la liste des maps et de rajouter, retirer, et de se téléporter à une map");
+        sender.sendMessage("  §7- /ctf map §7<add|remove|teleport> <map>");
+        sender.sendMessage("    §fPermet de rajouter, retirer, et de se téléporter à une map");
+        sender.sendMessage(" ");
+        sender.sendMessage("  §7- /ctf map §7list");
+        sender.sendMessage("    §fPermet de voir la liste des maps");
+        sender.sendMessage(" ");
+        sender.sendMessage("  §7- /ctf map §7wand");
+        sender.sendMessage("    §fPermet de vous donner l'outil qui permet de sélectionner une zone");
+        sender.sendMessage("    §cAttention » §evous devez être sur le monde (la map).");
         sender.sendMessage(" ");
         sender.sendMessage("  §7- /ctf map setspawn <blue|red>");
         sender.sendMessage("    §fPermet de définir l'emplacement d'apparition d'une équipe");

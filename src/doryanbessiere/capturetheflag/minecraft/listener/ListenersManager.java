@@ -16,5 +16,8 @@ public class ListenersManager {
         pluginManager.registerEvents(new FoodLevelChangeListener(), plugin);
         pluginManager.registerEvents(new EntityDamageListener(), plugin);
         pluginManager.registerEvents(new BlockListener(), plugin);
+        pluginManager.registerEvents(new PlayerInteractListener(), plugin);
+        pluginManager.registerEvents(new PlayerMoveListener(), plugin);
+        pluginManager.registerEvents(new PlayerTeleportListener(), plugin);
     }
 }

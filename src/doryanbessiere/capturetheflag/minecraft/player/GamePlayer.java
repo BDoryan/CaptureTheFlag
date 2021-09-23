@@ -1,6 +1,10 @@
 package doryanbessiere.capturetheflag.minecraft.player;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
+import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
+import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
+import doryanbessiere.capturetheflag.minecraft.flag.Flag;
+import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.player.scoreboard.PlayerScoreboard;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
@@ -9,7 +13,9 @@ import org.bukkit.entity.Player;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class GamePlayer {
@@ -19,6 +25,10 @@ public class GamePlayer {
     private PlayerScoreboard scoreboard;
     private String name;
 
+    private Flag flag;
+
+    private ArrayList<Cuboid> areas = new ArrayList<>();
+
     public GamePlayer(Player player) {
         this.player = player;
         this.name = player.getName();
@@ -26,6 +36,33 @@ public class GamePlayer {
         this.scoreboard.create();
 
         setTeam(null);
+    }
+
+    public void enter(Cuboid area){
+        if(inArea(area))return;
+        areas.add(area);
+
+        if(area == GameManager.map.getAreas().get(getTeam() == Team.RED ? Team.BLUE : Team.RED)){
+            Logger.debug(player.getLocation().getDirection().getY()+"");
+            if(player.getLocation().getDirection().getY() < -0.5 || player.getLocation().getDirection().getY() > 0.5){
+                player.getLocation().getDirection().setY(0.50);
+                Logger.debug("setDirection");
+            }
+            player.setVelocity(player.getLocation().getDirection().multiply(-2).setY(0.5));
+        }
+    }
+
+    public void exit(Cuboid area){
+        if(!inArea(area))return;
+        areas.remove(area);
+    }
+
+    public boolean inArea(Cuboid area){
+        return areas.contains(area);
+    }
+
+    public ArrayList<Cuboid> getAreas() {
+        return areas;
     }
 
     /**
@@ -107,5 +144,30 @@ public class GamePlayer {
     public void leaveTeam() {
         if(team!= null)
             team.removePlayer(this);
+    }
+
+    public ArrayList<Cuboid> getCopyAreas() {
+        ArrayList<Cuboid> areas = new ArrayList<>();
+        areas.addAll(this.areas);
+        return areas;
+    }
+
+    public Flag getFlag() {
+        return flag;
+    }
+
+    public void setFlag(Flag flag) {
+        this.flag = flag;
+    }
+
+    public void death() {
+        if(flag != null)
+            flag.drop();
+
+        clearAllInventory();
+        clearLevel();
+        heal();
+        feed();
+        player.teleport(GameManager.map.getSpawns().get(team));
     }
 }

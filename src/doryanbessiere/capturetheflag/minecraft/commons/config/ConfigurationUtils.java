@@ -1,6 +1,7 @@
 package doryanbessiere.capturetheflag.minecraft.commons.config;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
+import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,13 +17,27 @@ public class ConfigurationUtils {
      * @param location
      * @param path
      */
-    public static void setLocation(FileConfiguration configuration, Location location, String path){
+    public static void setLocation(FileConfiguration configuration, Location location, String path, boolean direction){
         configuration.set(path+".world", location.getWorld().getName());
         configuration.set(path+".x", location.getX());
         configuration.set(path+".y", location.getY());
         configuration.set(path+".z", location.getZ());
-        configuration.set(path+".yaw", location.getYaw());
-        configuration.set(path+".pitch", location.getPitch());
+        if(direction){
+            configuration.set(path+".yaw", location.getYaw());
+            configuration.set(path+".pitch", location.getPitch());
+        }
+    }
+
+    /**
+     *
+     * This method only allows to define the values, the saving of the configuration file must be done by you.
+     *
+     * @param configuration
+     * @param location
+     * @param path
+     */
+    public static void setLocation(FileConfiguration configuration, Location location, String path){
+        setLocation(configuration, location,path,true);
     }
 
     /**
@@ -46,5 +61,17 @@ public class ConfigurationUtils {
             pitch = (float) configuration.getDouble(path+".pitch");
 
         return new Location(Bukkit.getWorld(world), x, y, z, yaw, pitch);
+    }
+
+    public static void setArea(FileConfiguration configuration, Cuboid cuboid, String path){
+        setLocation(configuration, cuboid.getMinimum(), path+".minimum");
+        setLocation(configuration, cuboid.getMaximum(), path+".maximum");
+    }
+
+    public static Cuboid getArea(FileConfiguration configuration, String path) {
+        Location minimum = getLocation(configuration, path+".minimum");
+        Location maximum = getLocation(configuration, path+".maximum");
+
+        return new Cuboid(minimum, maximum);
     }
 }

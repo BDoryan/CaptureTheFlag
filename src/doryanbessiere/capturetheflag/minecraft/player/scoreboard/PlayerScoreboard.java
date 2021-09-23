@@ -53,10 +53,8 @@ public class PlayerScoreboard extends SimpleScoreboard {
             lines.put(13, "§6» §c"+ GameManager.getPlayers().size() +"§7/§c"+GameManager.MAX_PLAYERS);
             lines.put(12, "§f§7");
             lines.put(11, "§eKit §6» §caucun");
-            lines.put(10, "§f§8");
             if(GameManager.map != null){
-                lines.put(9, "§eMap §6» §c"+(GameManager.map == null ? "aléatoire" : GameManager.map.getName()));
-                lines.put(8, "§8");
+                lines.put(10, "§eMap §6» §c"+GameManager.map.getName());
             }
             lines.put(2, "§f§8§m-------------------");
             lines.put(1, "§7play.enantia.fr");

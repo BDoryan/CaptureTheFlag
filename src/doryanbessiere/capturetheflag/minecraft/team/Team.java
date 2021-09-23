@@ -1,8 +1,10 @@
 package doryanbessiere.capturetheflag.minecraft.team;
 
+import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
@@ -12,19 +14,25 @@ import java.util.Locale;
 
 public enum Team {
 
-    RED("§c", "§7[§cRouge§7]"),
-    BLUE("§9",  "§7[§bBlue§7]");
+    RED("§c", DyeColor.RED,"Rouge", "§7[§cRouge§7]", null),
+    BLUE("§9",  DyeColor.BLUE,"Bleu","§7[§bBlue§7]", null); ;
 
     private String nameColor;
+    private DyeColor dyeColor;
+    private String name;
     private String prefix;
+    private Flag flag;
 
     private org.bukkit.scoreboard.Team team;
 
     private ArrayList<GamePlayer> players = new ArrayList<>();
 
-    Team(String nameColor, String prefix) {
+    Team(String nameColor, DyeColor dyeColor, String name, String prefix, Flag flag) {
         this.nameColor = nameColor;
+        this.dyeColor = dyeColor;
+        this.name = name;
         this.prefix = prefix;
+        this.flag = flag;
     }
 
     public org.bukkit.scoreboard.Team getScoreboardTeam(GamePlayer player){
@@ -94,8 +102,24 @@ public enum Team {
         return null;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public DyeColor getDyeColor() {
+        return dyeColor;
+    }
+
     public String getPrefix() {
         return prefix;
+    }
+
+    public void setFlag(Flag flag) {
+        this.flag = flag;
+    }
+
+    public Flag getFlag() {
+        return flag;
     }
 
     public String getNameColor() {

@@ -5,12 +5,11 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
+import java.util.ArrayList;
+
 public class Cuboid {
 
 	private String worldName;
-	
-	private int[] location1;
-	private int[] location2;
 
 	private int maxX;
 	private int maxY;
@@ -21,8 +20,6 @@ public class Cuboid {
 	private int minZ;
 
 	public Cuboid(Location l, Location l2) {
-		this.location1 = new int[] {l.getBlockX(), l.getBlockY(), l.getBlockZ()};
-		this.location2 = new int[] {l2.getBlockX(), l2.getBlockY(), l2.getBlockZ()};
 		if (l.getWorld().getName().equalsIgnoreCase(l2.getWorld().getName())) {
 			this.worldName = l.getWorld().getName();
 			if (l.getBlockX() > l2.getBlockX()) {
@@ -49,12 +46,12 @@ public class Cuboid {
 		}
 	}
 
-	public Location getLocation2() {
-		return new Location(Bukkit.getWorld(worldName), location2[0],location2[1], location2[2]);
+	public Location getMinimum() {
+		return new Location(Bukkit.getWorld(worldName), minX, minY, minZ);
 	}
 
-	public Location getLocation1() {
-		return new Location(Bukkit.getWorld(worldName), location1[0],location1[1], location1[2]);
+	public Location getMaximum() {
+		return new Location(Bukkit.getWorld(worldName), maxX, maxY, maxZ);
 	}
 
 	public boolean isInCube(Location location) {

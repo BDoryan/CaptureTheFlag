@@ -3,7 +3,9 @@ package doryanbessiere.capturetheflag.minecraft.game;
 import com.google.common.collect.Lists;
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.config.ConfigurationUtils;
+import doryanbessiere.capturetheflag.minecraft.commons.items.ItemBuilder;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
+import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.map.Map;
 import doryanbessiere.capturetheflag.minecraft.map.MapManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
@@ -13,7 +15,9 @@ import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +32,19 @@ public class GameManager {
     public static HashMap<String, GamePlayer> players = new HashMap<>();
     public static GameState state = GameState.WAITING;
     public static Map map = null;
+
+    public static final ItemStack WAND = new ItemBuilder(Material.STICK).setName("§6Outil de zone §7(clic-droit ou clic-gauche)").toItemStack();
+
+    public static HashMap<Player, Location> position1 = new HashMap<>();
+    public static HashMap<Player, Location> position2 = new HashMap<>();
+
+    public static HashMap<Player, Location> getPosition1() {
+        return position1;
+    }
+
+    public static HashMap<Player, Location> getPosition2() {
+        return position2;
+    }
 
     /**
      * This method is executed when a player joins the server (the game)
@@ -87,13 +104,9 @@ public class GameManager {
      * @param force
      */
     public static void start(boolean force){
-        if(force){
-            Logger.debug("The game is started by force.");
-        }
-
         map = MapManager.randomMap();
 
-        gameRunnable = new GameRunnable(new Runnable(){
+        Runnable runnable = new Runnable(){
             @Override
             public void run() {
                 randomTeam();
@@ -102,9 +115,20 @@ public class GameManager {
                     team.getPlayers().forEach(player -> player.getPlayer().teleport(map.getSpawns().get(team)));
                 }
                 state = GameState.INGAME;
+                for(Team team : Team.values()){
+                    Flag flag = new Flag(team, map.getFlags().get(team));
+                    team.setFlag(flag);
+                }
             }
-        });
-        gameRunnable.start();
+        };
+
+        if(force){
+            Logger.debug("The game is started by force.");
+            runnable.run();
+        } else {
+            gameRunnable = new GameRunnable(runnable);
+            gameRunnable.start();
+        }
     }
 
     /**

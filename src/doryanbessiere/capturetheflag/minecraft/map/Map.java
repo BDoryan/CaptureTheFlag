@@ -2,6 +2,7 @@ package doryanbessiere.capturetheflag.minecraft.map;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.config.ConfigurationUtils;
+import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
@@ -11,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 
@@ -20,6 +22,7 @@ public class Map {
 
     private HashMap<Team, Location> spawns = new HashMap<Team, Location>();
     private HashMap<Team, Location> flags = new HashMap<Team, Location>();
+    private HashMap<Team, Cuboid> areas = new HashMap<Team, Cuboid>();
 
     public Map() {
     }
@@ -30,8 +33,9 @@ public class Map {
 
         Logger.debug("world="+world);
         for(Team team : Team.values()){
-            spawns.put(team, new Location(world, 0, 0, 0));
-            flags.put(team, new Location(world, 0, 0, 0));
+            spawns.put(team, new Location(world, 0, 20, 0));
+            flags.put(team, new Location(world, 0, 20, 0));
+            areas.put(team, new Cuboid(new Location(world, 0, 0, 0),new Location(world, 0, 0, 0)));
         }
 
         save();
@@ -46,6 +50,7 @@ public class Map {
         for(Team team : Team.values()){
             map.flags.put(team, ConfigurationUtils.getLocation(configuration, "maps."+name+"."+team.toString().toLowerCase()+".flag"));
             map.spawns.put(team, ConfigurationUtils.getLocation(configuration, "maps."+name+"."+team.toString().toLowerCase()+".spawn"));
+            map.areas.put(team, ConfigurationUtils.getArea(configuration, "maps."+name+"."+team.toString().toLowerCase()+".area.spawn"));
         }
 
         map.save();
@@ -68,9 +73,18 @@ public class Map {
         for(Team team : Team.values()){
             ConfigurationUtils.setLocation(configuration, flags.get(team), "maps."+name+"."+team.toString().toLowerCase()+".flag");
             ConfigurationUtils.setLocation(configuration, spawns.get(team), "maps."+name+"."+team.toString().toLowerCase()+".spawn");
+            ConfigurationUtils.setArea(configuration, areas.get(team), "maps."+name+"."+team.toString().toLowerCase()+".area.spawn");
         }
 
         CaptureTheFlag.saveConfiguration();
+    }
+
+    public void enter(Player player, Team team){
+
+    }
+
+    public void exit(Player player, Team team){
+
     }
 
     public World loadWorld(){
@@ -93,6 +107,10 @@ public class Map {
 
     public HashMap<Team, Location> getSpawns() {
         return spawns;
+    }
+
+    public HashMap<Team, Cuboid> getAreas() {
+        return areas;
     }
 
     public String getName() {

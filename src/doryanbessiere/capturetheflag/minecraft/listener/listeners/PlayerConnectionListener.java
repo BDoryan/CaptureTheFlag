@@ -2,6 +2,8 @@ package doryanbessiere.capturetheflag.minecraft.listener.listeners;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
+import doryanbessiere.capturetheflag.minecraft.game.GameState;
+import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,6 +23,11 @@ public class PlayerConnectionListener implements Listener {
     @EventHandler
     public void PlayerQuitEvent_(PlayerQuitEvent event){
         Player player = event.getPlayer();
+        GamePlayer gamePlayer = GameManager.getGamePlayer(player);
+
+        if(GameManager.isState(GameState.INGAME)){
+            gamePlayer.death();
+        }
         GameManager.quit(player);
         event.setQuitMessage(null);
     }
