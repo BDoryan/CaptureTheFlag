@@ -17,7 +17,7 @@ public class PlayerTeleportListener implements Listener {
         GamePlayer gamePlayer = GameManager.getGamePlayer(player);
 
         if(!GameManager.isState(GameState.INGAME))return;
-        GameManager.map.getAreas().forEach((team, area) -> {
+        GameManager.getMap().getAreas().forEach((team, area) -> {
             if(team != gamePlayer.getTeam() && area.isInCube(event.getTo())){
                 event.setCancelled(true);
                 gamePlayer.sendMessage("§cVous ne pouvez pas aller dans la base de l'ennemie!");

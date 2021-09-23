@@ -1,14 +1,13 @@
 package doryanbessiere.capturetheflag.minecraft.flag;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
+import doryanbessiere.capturetheflag.minecraft.commons.Commons;
 import doryanbessiere.capturetheflag.minecraft.commons.items.ItemBuilder;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
+import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
-import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -16,10 +15,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.HashMap;
+
 public class Flag {
 
     private Team team;
-    private GamePlayer thief;
+    private GamePlayer carrier;
     private Location base;
     private Location location;
 
@@ -41,8 +42,8 @@ public class Flag {
         return team;
     }
 
-    public GamePlayer getThief() {
-        return thief;
+    public GamePlayer getCarrier() {
+        return carrier;
     }
 
     public Location getLocation() {
@@ -52,10 +53,15 @@ public class Flag {
     public void stolen(GamePlayer gamePlayer) {
         if(task != null){
             task.cancel();
+            task = null;
         }
 
-        this.thief = gamePlayer;
-        this.thief.setFlag(this);
+        this.carrier = gamePlayer;
+        this.carrier.setFlag(this);
+
+        if(!atBase()){
+            this.location.getBlock().setType(Material.AIR);
+        }
 
         Player player = gamePlayer.getPlayer();
         ItemStack banner_item = new ItemBuilder(Material.BANNER).setName(team.getNameColor()+"Drapeau de l'équipe "+team.getName()).toItemStack();
@@ -69,23 +75,104 @@ public class Flag {
         bannerState.setBaseColor(DyeColor.WHITE);
         bannerState.update();
 
-        Logger.debug(team.getName()+" team flag has just been stolen by the player "+thief.getName());
+        Logger.debug(team.getName()+" team flag has just been stolen by the player "+player.getName());
+        CaptureTheFlag.broadcast("§c"+gamePlayer.getTeam().getNameColor()+gamePlayer.getName()+" §7a volé le drapeau "+team.getNameColor()+team.getName()+"§7!");
+        GameManager.getMap().getWorld().strikeLightningEffect(location);
+    }
+
+    public void init(){
+        Block bannerBlock = location.getBlock();
+        Banner bannerState = (Banner) bannerBlock.getState();
+        bannerState.setBaseColor(team.getDyeColor());
+        bannerState.update();
     }
 
     private BukkitTask task;
 
-    public void drop(){
-        this.thief.setFlag(null);
-        this.thief = null;
+    public void dropInVoid(){
+        this.location = null;
+        backToBase();
+    }
 
+    public void drop(){
+        GamePlayer oldCarrier = this.carrier;
+
+        this.carrier.setFlag(null);
+        this.carrier = null;
+
+        Location ground = oldCarrier.getPlayer().getLocation();
+        while(true){
+            ground.add(0, -1, 0);
+
+            if(ground.getBlock().getType() != Material.AIR)
+                break;
+
+            if(ground.getBlockY() < 0)
+            {
+                ground = null;
+                break;
+            }
+        }
+
+        if(ground == null){
+            dropInVoid();
+            return;
+        }
+
+        this.location = ground.add(0, 1, 0);
+
+        Block bannerBlock = location.getBlock();
+        bannerBlock.setType(Material.STANDING_BANNER);
+        Banner bannerState = (Banner) bannerBlock.getState();
+        bannerState.setBaseColor(team.getDyeColor());
+        bannerState.update();
+
+        int seconds= 15;
         task = Bukkit.getScheduler().runTaskLater(CaptureTheFlag.getInstance(), new Runnable() {
             @Override
             public void run() {
                 backToBase();
             }
-        }, 20 * 15);
+        }, 20 * seconds);
 
         Logger.debug("the "+team.getName()+" team flag is falling to the ground");
+        GameManager.getMap().getWorld().strikeLightningEffect(location);
+        CaptureTheFlag.broadcast("§dLe drapeau "+team.getNameColor()+team.getName()+" §dvas être reset dans §a"+seconds+" secondes§d!");
+    }
+
+    public void capture(GamePlayer carrier) {
+        Block bannerBlock = base.getBlock();
+        Banner bannerState = (Banner) bannerBlock.getState();
+        bannerState.setBaseColor(team.getDyeColor());
+        bannerState.update();
+
+        this.carrier.getPlayer().getEquipment().setHelmet(new ItemStack(Material.AIR));
+        this.carrier.setFlag(null);
+        this.carrier.getTeam().capture();
+        this.carrier = null;
+
+        GameManager.getMap().getWorld().strikeLightningEffect(carrier.getPlayer().getLocation());
+
+        location = base;
+        CaptureTheFlag.broadcast("§c"+carrier.getTeam().getNameColor()+carrier.getName()+" §7a déposé le drapeau "+team.getNameColor()+team.getName()+"§7 dans son camp!");
+    }
+
+    public void returnToBase(GamePlayer carrier) {
+        if(task != null){
+            task.cancel();
+            task = null;
+        }
+
+        Block bannerBlock = base.getBlock();
+        Banner bannerState = (Banner) bannerBlock.getState();
+        bannerState.setBaseColor(team.getDyeColor());
+        bannerState.update();
+
+        if(location != null)
+            location.getBlock().setType(Material.AIR);
+
+        location = base;
+        CaptureTheFlag.broadcast("§c"+carrier.getTeam().getNameColor()+carrier.getName()+" §7a ramené le drapeau "+team.getNameColor()+team.getName()+"§7 dans son camp!");
     }
 
     public void backToBase(){
@@ -94,17 +181,50 @@ public class Flag {
         bannerState.setBaseColor(team.getDyeColor());
         bannerState.update();
 
-        location.getBlock().setType(Material.AIR);
+        if(location != null)
+            location.getBlock().setType(Material.AIR);
+
         location = base;
+        CaptureTheFlag.broadcast("§dLe drapeau "+team.getNameColor()+team.getName()+" §da été reset.");
     }
 
-    public boolean hasThief(){
-        return thief != null;
+    public boolean hasCarrier(){
+        return carrier != null;
     }
 
     public boolean atBase(){
         return location.getBlockX() == base.getBlockX() &&
                 location.getBlockY() == base.getBlockY() &&
                 location.getBlockZ() == base.getBlockZ();
+    }
+
+    public boolean compareLocation(Location location) {
+        return Commons.compareLocation(location, this.location);
+    }
+
+    public boolean compareBase(Location location) {
+        return Commons.compareLocation(location, this.base);
+    }
+
+    public static void interact(GamePlayer gamePlayer, Location to){
+        if(gamePlayer.getFlag() == null){
+            for(Team team : Team.values()){
+                Flag flag = team.getFlag();
+
+                if(Commons.compareLocation(flag.getLocation(), to)){
+                    if(!flag.atBase() && flag.getTeam() == gamePlayer.getTeam()) {
+                        flag.returnToBase(gamePlayer);
+                    } else if(flag.getTeam() != gamePlayer.getTeam()){
+                        flag.stolen(gamePlayer);
+                    }
+                }
+            }
+        } else {
+            Flag flag = gamePlayer.getTeam().getFlag();
+
+            if(flag.compareBase(to)){
+                gamePlayer.getFlag().capture(gamePlayer);
+            }
+        }
     }
 }

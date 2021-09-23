@@ -3,26 +3,24 @@ package doryanbessiere.capturetheflag.minecraft.schedulers;
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
-import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitRunnable;
 
-public class GameRunnable implements Runnable {
+public class GameStartingRunnable implements Runnable {
 
     private int task;
     private int seconds;
+    private Runnable runnable;
 
-    public GameRunnable() {
+    public GameStartingRunnable(Runnable runnable) {
+        this.runnable = runnable;
     }
 
     public void start(){
-        this.seconds = 60 * 30;
+        this.seconds = 30;
 
         this.task = Bukkit.getScheduler().scheduleSyncRepeatingTask(CaptureTheFlag.getInstance(), this,0, 20);
-        Logger.debug("GameRunnable : start.");
-    }
-
-    public int getSeconds() {
-        return seconds;
+        Logger.debug("GameStartingRunnable : start.");
     }
 
     public void cancel() {
@@ -33,10 +31,11 @@ public class GameRunnable implements Runnable {
     public void run() {
         if(seconds==0) {
             cancel();
-            Team winner = Team.RED.getCapture() == Team.BLUE.getCapture() ? (Team.RED.getCapture() > Team.BLUE.getCapture() ? Team.RED : Team.BLUE) : null;
-            GameManager.finish(winner);
+            runnable.run();
             return;
         }
+
+        GameManager.getPlayers().forEach(player -> player.getPlayer().setLevel(seconds));
         seconds--;
     }
 }

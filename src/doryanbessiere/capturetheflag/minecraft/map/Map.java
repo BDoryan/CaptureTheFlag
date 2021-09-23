@@ -4,13 +4,13 @@ import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.config.ConfigurationUtils;
 import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
+import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import doryanbessiere.capturetheflag.minecraft.world.WorldManager;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
+import org.bukkit.block.Banner;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -62,8 +62,8 @@ public class Map {
     public void remove() {
         FileConfiguration configuration = CaptureTheFlag.getConfiguration();
         configuration.set("maps."+name, null);
+        getWorld().getPlayers().forEach(player -> GameManager.teleportToLobby(player));
         Bukkit.unloadWorld(name, true);
-        Bukkit.getWorld(name).getPlayers().forEach(player -> GameManager.teleportToLobby(player));
         CaptureTheFlag.saveConfiguration();
     }
 
@@ -79,12 +79,12 @@ public class Map {
         CaptureTheFlag.saveConfiguration();
     }
 
-    public void enter(Player player, Team team){
-
-    }
-
-    public void exit(Player player, Team team){
-
+    public void init(){
+        flags.forEach((team, location) -> {
+            Flag flag = new Flag(team, location);
+            flag.init();
+            team.setFlag(flag);
+        });
     }
 
     public World loadWorld(){
@@ -117,4 +117,7 @@ public class Map {
         return name;
     }
 
+    public World getWorld() {
+        return Bukkit.getWorld(name);
+    }
 }

@@ -86,12 +86,12 @@ public class CaptureTheFlag extends JavaPlugin {
     }
 
     public static void sendMessage(CommandSender sender, String text){
-        sender.sendMessage(PREFIX+text);
+        sender.sendMessage(text);
     }
     public static void sendMessage(Player player, String text){
-        player.sendMessage(PREFIX+text);
+        player.sendMessage(text);
     }
     public static void broadcast(String text){
-        Bukkit.broadcastMessage(PREFIX+text);
+        Bukkit.broadcastMessage(text);
     }
 }

@@ -39,9 +39,24 @@ public class PlayerMoveListener implements Listener {
             if (lastLocation.getBlockX() == to.getBlockX() && lastLocation.getBlockY() == to.getBlockY()
                     && lastLocation.getBlockZ() == to.getBlockZ()) return;
 
+            if(to.getY() < 0){
+                gamePlayer.death();
+                return;
+            }
 
-            GameManager.map.getAreas().forEach((team, area) -> {
-                if(team != gamePlayer.getTeam() && area.isInCube(event.getTo())){
+            if(!gamePlayer.hasRespawn()){
+                event.getFrom().setPitch(event.getTo().getPitch());
+                event.getFrom().setYaw(event.getTo().getYaw());
+                event.setTo(event.getFrom());
+                return;
+            }
+
+            /**
+             * S'occupe d'éjecter les joueurs lorqu'ils n'ont pas le droit d'être dans une zone
+             */
+            GameManager.getMap().getAreas().forEach((team, area) -> {
+                if((team != gamePlayer.getTeam() || (team == gamePlayer.getTeam()) && gamePlayer.getFlag()!= null) && area.isInCube(event.getTo())){
+                    float pitch = event.getFrom().getPitch();
                     event.getTo().setPitch(0);
                     Vector inverseDirectionVec = player.getLocation().getDirection().normalize().multiply(-1);
                     Location behind = player.getLocation().add(inverseDirectionVec);
@@ -54,32 +69,38 @@ public class PlayerMoveListener implements Listener {
                     }
                     vel = vel.setY(0.5);
                     player.setVelocity(vel);
+                    event.getTo().setPitch(pitch);
                 }
             });
 
-            GameManager.map.getAreas().forEach((team, area) -> {
+            /**
+             * Permet de définir lorsqu'un joueur rentre dans une zone
+             */
+            GameManager.getMap().getAreas().forEach((team, area) -> {
                 if(area.isInCube(player.getLocation())) {
                     gamePlayer.enter(area);
                 }
             });
+
+            /**
+             * Permet de définir lorsqu'un joueur quitte une zone
+             */
             gamePlayer.getCopyAreas().forEach(area -> {
                 if(!area.isInCube(player.getLocation()))
                     gamePlayer.exit(area);
             });
 
-            if(gamePlayer.getFlag() == null){
-                GameManager.map.getFlags().forEach((team, location) -> {
-                    if(team != gamePlayer.getTeam()){
-                        Flag flag = team.getFlag();
-                        if(flag.getLocation().getBlockX() == to.getBlockX() &&
-                                team.getFlag().getLocation().getBlockY() == to.getBlockY() &&
-                                team.getFlag().getLocation().getBlockZ() == to.getBlockZ()){
-                            flag.stolen(gamePlayer);
-                            return;
-                        }
-                    }
-                });
-            }
+            /**
+             * Gestion des drapeau
+             */
+            Flag.interact(gamePlayer, event.getTo());
+
+            /**
+             * Permet de définir l'endroit où placer le drapeau (déplacé par le joueur)
+             */
+            if(gamePlayer.getFlag() != null)
+                gamePlayer.getFlag().setLocation(player.getLocation());
+
             lastPlayerLocation.put(player, to);
         } else {
             lastPlayerLocation.put(player, to);

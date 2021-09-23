@@ -1,5 +1,7 @@
 package doryanbessiere.capturetheflag.minecraft.commons;
 
+import org.bukkit.Location;
+
 public class Commons {
 
     public static String lineSeparator() {
@@ -23,5 +25,11 @@ public class Commons {
         }
 
         return line;
+    }
+
+    public static boolean compareLocation(Location location1, Location location2){
+        return location1.getBlockX() == location2.getBlockX()
+                && location1.getBlockY() == location2.getBlockY()
+                && location1.getBlockZ() == location2.getBlockZ();
     }
 }

@@ -4,6 +4,7 @@ import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
@@ -14,25 +15,45 @@ import java.util.Locale;
 
 public enum Team {
 
-    RED("§c", DyeColor.RED,"Rouge", "§7[§cRouge§7]", null),
-    BLUE("§9",  DyeColor.BLUE,"Bleu","§7[§bBlue§7]", null); ;
+    RED("§c", DyeColor.RED, Color.RED,"Rouge", "§7[§cRouge§7]", null),
+    BLUE("§9",  DyeColor.BLUE, Color.RED,"Bleu","§7[§bBlue§7]", null);
+
+    public static final int MAX_CAPTURE = 3;
 
     private String nameColor;
     private DyeColor dyeColor;
+    private Color color;
     private String name;
     private String prefix;
     private Flag flag;
+    private int capture = 0;
 
     private org.bukkit.scoreboard.Team team;
 
     private ArrayList<GamePlayer> players = new ArrayList<>();
 
-    Team(String nameColor, DyeColor dyeColor, String name, String prefix, Flag flag) {
+    Team(String nameColor, DyeColor dyeColor, Color color, String name, String prefix, Flag flag) {
         this.nameColor = nameColor;
         this.dyeColor = dyeColor;
+        this.color = color;
         this.name = name;
         this.prefix = prefix;
         this.flag = flag;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public void capture(){
+        capture++;
+        if(capture == MAX_CAPTURE){
+            GameManager.finish(this);
+        }
+    }
+
+    public int getCapture() {
+        return capture;
     }
 
     public org.bukkit.scoreboard.Team getScoreboardTeam(GamePlayer player){

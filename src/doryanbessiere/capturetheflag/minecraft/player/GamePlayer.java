@@ -8,6 +8,7 @@ import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.player.scoreboard.PlayerScoreboard;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -42,7 +43,7 @@ public class GamePlayer {
         if(inArea(area))return;
         areas.add(area);
 
-        if(area == GameManager.map.getAreas().get(getTeam() == Team.RED ? Team.BLUE : Team.RED)){
+        if(area == GameManager.getMap().getAreas().get(getTeam() == Team.RED ? Team.BLUE : Team.RED)){
             Logger.debug(player.getLocation().getDirection().getY()+"");
             if(player.getLocation().getDirection().getY() < -0.5 || player.getLocation().getDirection().getY() > 0.5){
                 player.getLocation().getDirection().setY(0.50);
@@ -168,6 +169,49 @@ public class GamePlayer {
         clearLevel();
         heal();
         feed();
-        player.teleport(GameManager.map.getSpawns().get(team));
+
+        respawn();
+        deaths++;
+    }
+
+    private boolean hasRespawn = true;
+    private int respawnLeft = 5;
+    private int respawnTask;
+
+    public void respawn(){
+        hasRespawn = false;
+        player.teleport(GameManager.getMap().getSpawns().get(team));
+        player.setGameMode(GameMode.SPECTATOR);
+
+        respawnTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(CaptureTheFlag.getInstance(), new Runnable() {
+            @Override
+            public void run() {
+                if(respawnLeft == 0){
+                    respawnLeft= 5;
+                    hasRespawn = true;
+                    player.setGameMode(GameMode.SURVIVAL);
+                    Bukkit.getScheduler().cancelTask(respawnTask);
+                    player.sendTitle("", "");
+                    return;
+                }
+                player.sendTitle("§aRéapparition dans §f"+respawnLeft+" secondes§a.", "");
+                respawnLeft--;
+            }
+        }, 0, 20);
+    }
+
+    public boolean hasRespawn() {
+        return hasRespawn;
+    }
+
+    private int kills=0;
+    private int deaths=0;
+
+    public int getKills() {
+        return kills;
+    }
+
+    public int getDeaths() {
+        return deaths;
     }
 }

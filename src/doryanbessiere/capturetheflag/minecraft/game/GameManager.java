@@ -1,15 +1,15 @@
 package doryanbessiere.capturetheflag.minecraft.game;
 
-import com.google.common.collect.Lists;
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.config.ConfigurationUtils;
 import doryanbessiere.capturetheflag.minecraft.commons.items.ItemBuilder;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
-import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.map.Map;
 import doryanbessiere.capturetheflag.minecraft.map.MapManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
+import doryanbessiere.capturetheflag.minecraft.schedulers.GameFinishRunnable;
 import doryanbessiere.capturetheflag.minecraft.schedulers.GameRunnable;
+import doryanbessiere.capturetheflag.minecraft.schedulers.GameStartingRunnable;
 import doryanbessiere.capturetheflag.minecraft.schedulers.ScoreboardRunnable;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
@@ -19,24 +19,22 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
 public class GameManager {
 
     public static int MIN_PLAYERS = 6;
     public static int MAX_PLAYERS = 40;
 
-    public static HashMap<String, GamePlayer> players = new HashMap<>();
-    public static GameState state = GameState.WAITING;
-    public static Map map = null;
+    private static HashMap<String, GamePlayer> players = new HashMap<>();
+    private static GameState state = GameState.WAITING;
+    private static Map map = null;
+    private static GameRunnable gameRunnable;
 
     public static final ItemStack WAND = new ItemBuilder(Material.STICK).setName("§6Outil de zone §7(clic-droit ou clic-gauche)").toItemStack();
 
-    public static HashMap<Player, Location> position1 = new HashMap<>();
-    public static HashMap<Player, Location> position2 = new HashMap<>();
+    private static HashMap<Player, Location> position1 = new HashMap<>();
+    private static HashMap<Player, Location> position2 = new HashMap<>();
 
     public static HashMap<Player, Location> getPosition1() {
         return position1;
@@ -61,11 +59,15 @@ public class GameManager {
             if(GameManager.getPlayers().size() < GameManager.MIN_PLAYERS){
                 Bukkit.broadcastMessage(CaptureTheFlag.getPrefix()+"§7Il faut minimum "+MIN_PLAYERS+" joueurs afin que la partie se lance..");
             }*/
-
-            player.setGameMode(GameMode.ADVENTURE);
-            gamePlayer.clean();
-            teleportToLobby(player);
+            lobby(gamePlayer);
         }
+    }
+
+    public static void lobby(GamePlayer gamePlayer){
+        Player player = gamePlayer.getPlayer();
+        player.setGameMode(GameMode.ADVENTURE);
+        gamePlayer.clean();
+        teleportToLobby(player);
     }
 
     /**
@@ -96,7 +98,13 @@ public class GameManager {
         Logger.debug(player.getName()+" teleported to lobby ! ");
     }
 
-    public static GameRunnable gameRunnable;
+    public static void finish(Team team) {
+        Bukkit.getWorlds().get(0).setTime(15000);
+        getPlayers().forEach(gamePlayer -> lobby(gamePlayer));
+        new GameFinishRunnable(team).start();
+    }
+
+    public static GameStartingRunnable startingRunnable;
 
     /**
      * Starting the game (can be forced)
@@ -105,6 +113,8 @@ public class GameManager {
      */
     public static void start(boolean force){
         map = MapManager.randomMap();
+        map.init();
+        map.getWorld().setTime(new Random().nextInt(8000));
 
         Runnable runnable = new Runnable(){
             @Override
@@ -115,10 +125,12 @@ public class GameManager {
                     team.getPlayers().forEach(player -> player.getPlayer().teleport(map.getSpawns().get(team)));
                 }
                 state = GameState.INGAME;
-                for(Team team : Team.values()){
-                    Flag flag = new Flag(team, map.getFlags().get(team));
-                    team.setFlag(flag);
-                }
+                getPlayers().forEach(gamePlayer -> {
+                    Player player = gamePlayer.getPlayer();
+                    player.setGameMode(GameMode.SURVIVAL);
+                });
+                gameRunnable = new GameRunnable();
+                gameRunnable.start();
             }
         };
 
@@ -126,8 +138,8 @@ public class GameManager {
             Logger.debug("The game is started by force.");
             runnable.run();
         } else {
-            gameRunnable = new GameRunnable(runnable);
-            gameRunnable.start();
+            startingRunnable = new GameStartingRunnable(runnable);
+            startingRunnable.start();
         }
     }
 
@@ -138,6 +150,10 @@ public class GameManager {
         for(GamePlayer player : getPlayers()){
             Team.logicTeam(player);
         }
+    }
+
+    public static Map getMap() {
+        return map;
     }
 
     public static GameState getState() {
@@ -158,7 +174,12 @@ public class GameManager {
 
     public static void init(){
         new ScoreboardRunnable().start();
+        Bukkit.getWorlds().get(0).setTime(8000);
 
         Arrays.asList(Team.values()).forEach(team -> team.clearPlayers());
+    }
+
+    public static GameRunnable getGameRunnable() {
+        return gameRunnable;
     }
 }
