@@ -4,7 +4,10 @@ import com.google.common.collect.Lists;
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.config.ConfigurationUtils;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
+import doryanbessiere.capturetheflag.minecraft.map.Map;
+import doryanbessiere.capturetheflag.minecraft.map.MapManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
+import doryanbessiere.capturetheflag.minecraft.schedulers.GameRunnable;
 import doryanbessiere.capturetheflag.minecraft.schedulers.ScoreboardRunnable;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
@@ -24,6 +27,7 @@ public class GameManager {
 
     public static HashMap<String, GamePlayer> players = new HashMap<>();
     public static GameState state = GameState.WAITING;
+    public static Map map = null;
 
     /**
      * This method is executed when a player joins the server (the game)
@@ -53,9 +57,9 @@ public class GameManager {
      * @param player
      */
     public static void quit(Player player){
-        GamePlayer gamePlayer = players.get(player);
-        gamePlayer.getTeam().removePlayer(gamePlayer);
-        players.remove(player);
+        GamePlayer gamePlayer = getGamePlayer(player);
+        gamePlayer.leaveTeam();
+        players.remove(gamePlayer.getUUIDString());
 
         if(state == GameState.WAITING){
             /*
@@ -75,6 +79,8 @@ public class GameManager {
         Logger.debug(player.getName()+" teleported to lobby ! ");
     }
 
+    public static GameRunnable gameRunnable;
+
     /**
      * Starting the game (can be forced)
      *
@@ -85,7 +91,20 @@ public class GameManager {
             Logger.debug("The game is started by force.");
         }
 
-        randomTeam();
+        map = MapManager.randomMap();
+
+        gameRunnable = new GameRunnable(new Runnable(){
+            @Override
+            public void run() {
+                randomTeam();
+
+                for(Team team : Team.values()){
+                    team.getPlayers().forEach(player -> player.getPlayer().teleport(map.getSpawns().get(team)));
+                }
+                state = GameState.INGAME;
+            }
+        });
+        gameRunnable.start();
     }
 
     /**
@@ -106,7 +125,7 @@ public class GameManager {
     }
 
     public static GamePlayer getGamePlayer(Player player){
-        return players.get(player);
+        return players.get(player.getUniqueId().toString());
     }
 
     public static Collection<GamePlayer> getPlayers() {

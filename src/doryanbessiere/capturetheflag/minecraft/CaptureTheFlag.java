@@ -4,11 +4,14 @@ import doryanbessiere.capturetheflag.minecraft.command.CTFCommandManager;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.listener.ListenersManager;
+import doryanbessiere.capturetheflag.minecraft.map.MapManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public class CaptureTheFlag extends JavaPlugin {
 
@@ -24,6 +27,8 @@ public class CaptureTheFlag extends JavaPlugin {
         instance.saveConfig();
     }
 
+    private File maps_directory;
+
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
@@ -35,6 +40,9 @@ public class CaptureTheFlag extends JavaPlugin {
         commandManager = new CTFCommandManager(this);
         commandManager.loadCommands();
         Logger.debug("Loading of the commands : OK");
+
+        MapManager.loads(getConfiguration());
+        Logger.debug("Loading maps : OK");
 
         GameManager.init();
         Logger.debug("Initialization of the game : OK");
@@ -63,6 +71,7 @@ public class CaptureTheFlag extends JavaPlugin {
     public void onDisable() {
         this.saveDefaultConfig();
         super.onDisable();
+
         Logger.info("CaptureTheFlag : disabled");
     }
 
@@ -81,5 +90,8 @@ public class CaptureTheFlag extends JavaPlugin {
     }
     public static void sendMessage(Player player, String text){
         player.sendMessage(PREFIX+text);
+    }
+    public static void broadcast(String text){
+        Bukkit.broadcastMessage(PREFIX+text);
     }
 }

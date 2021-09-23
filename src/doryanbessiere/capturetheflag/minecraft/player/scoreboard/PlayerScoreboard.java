@@ -2,6 +2,7 @@ package doryanbessiere.capturetheflag.minecraft.player.scoreboard;
 
 import doryanbessiere.capturetheflag.minecraft.commons.scoreboard.SimpleScoreboard;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
+import doryanbessiere.capturetheflag.minecraft.game.GameState;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -17,7 +18,7 @@ public class PlayerScoreboard extends SimpleScoreboard {
 
     String[] titles = new String[] {
         "§7§lCaptureTheFlag",
-        "§9 §lCaptureTheFlag",
+        "§9§lCaptureTheFlag",
         "§c§lCaptureTheFlag",
     };
 
@@ -46,14 +47,22 @@ public class PlayerScoreboard extends SimpleScoreboard {
         setTitle(titles[index]);
         index++;
 
-        lines.put(15, "§8§m-------------------");
-        lines.put(14, "§eJoueurs:");
-        lines.put(13, "§6» §c"+ GameManager.getPlayers().size() +"§7/§c"+GameManager.MAX_PLAYERS);
-        lines.put(12, "§f§7");
-        lines.put(11, "§eKit §6» §cTank");
-        lines.put(10, "§f§8");
-        lines.put(2, "§f§8§m-------------------");
-        lines.put(1, "§7play.enantia.fr");
+        if(GameManager.isState(GameState.WAITING)){
+            lines.put(15, "§8§m-------------------");
+            lines.put(14, "§eJoueurs:");
+            lines.put(13, "§6» §c"+ GameManager.getPlayers().size() +"§7/§c"+GameManager.MAX_PLAYERS);
+            lines.put(12, "§f§7");
+            lines.put(11, "§eKit §6» §caucun");
+            lines.put(10, "§f§8");
+            if(GameManager.map != null){
+                lines.put(9, "§eMap §6» §c"+(GameManager.map == null ? "aléatoire" : GameManager.map.getName()));
+                lines.put(8, "§8");
+            }
+            lines.put(2, "§f§8§m-------------------");
+            lines.put(1, "§7play.enantia.fr");
+        } else {
+
+        }
 
         for (Integer slot : lines.keySet()) {
             String line = lines.get(slot);

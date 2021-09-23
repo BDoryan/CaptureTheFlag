@@ -1,7 +1,6 @@
 package doryanbessiere.capturetheflag.minecraft.player;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
-import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.player.scoreboard.PlayerScoreboard;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
@@ -11,7 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Random;
 import java.util.UUID;
 
 public class GamePlayer {
@@ -42,7 +40,8 @@ public class GamePlayer {
         if(team != null){
             customName = team.getNameColor()+getName();
         }
-        setDisplayName(customName);
+        player.setPlayerListName(customName);
+        //setDisplayName(customName);
     }
 
     public void sendMessage(String message){
@@ -93,62 +92,6 @@ public class GamePlayer {
         clearAllInventory();
     }
 
-    /**
-     * WARNING: this method can trigger problems, indeed depending on the version of spigot you use an error
-     *
-     * @param name
-     */
-    public void setDisplayName(String name){
-        player.setCustomName(player.getName());
-        player.setPlayerListName(name);
-
-        Logger.debug(player.getName()+".setDisplayName("+name.replace("§", "&")+")");
-
-        try {
-            Method getHandle = player.getClass().getMethod("getHandle");
-            Object entityPlayer = getHandle.invoke(player);
-            boolean gameProfileExists = false;
-            try {
-                Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
-                gameProfileExists = true;
-            } catch (ClassNotFoundException ignored) {
-            }
-            try {
-                Class.forName("com.mojang.authlib.GameProfile");
-                gameProfileExists = true;
-            } catch (ClassNotFoundException ignored) {
-            }
-            if (!gameProfileExists) {
-                Field nameField = entityPlayer.getClass().getSuperclass().getDeclaredField("name");
-                nameField.setAccessible(true);
-                nameField.set(entityPlayer, name);
-                Logger.debug("setDisplayName(): nameField.set("+name+")");
-            } else {
-                Object profile = entityPlayer.getClass().getMethod("getProfile").invoke(entityPlayer);
-                Field ff = profile.getClass().getDeclaredField("name");
-                ff.setAccessible(true);
-                ff.set(profile, name);
-                Logger.debug("setDisplayName(): ff.set("+name+")");
-            }
-            if (Bukkit.class.getMethod("getOnlinePlayers", new Class<?>[0]).getReturnType() == Collection.class) {
-                @SuppressWarnings("unchecked")
-                Collection<? extends Player> players = (Collection<? extends Player>) Bukkit.class.getMethod("getOnlinePlayers").invoke(null);
-                for (Player p : players) {
-                    p.hidePlayer(player);
-                    p.showPlayer(player);
-                }
-            } else {
-                Player[] players = ((Player[]) Bukkit.class.getMethod("getOnlinePlayers").invoke(null));
-                for (Player p : players) {
-                    p.hidePlayer(player);
-                    p.showPlayer(player);
-                }
-            }
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void updateScoreboard() {
         this.scoreboard.update();
     }
@@ -159,5 +102,10 @@ public class GamePlayer {
 
     public UUID getUUID() {
         return player.getUniqueId();
+    }
+
+    public void leaveTeam() {
+        if(team!= null)
+            team.removePlayer(this);
     }
 }

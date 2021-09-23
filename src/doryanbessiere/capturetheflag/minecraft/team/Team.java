@@ -1,5 +1,6 @@
 package doryanbessiere.capturetheflag.minecraft.team;
 
+import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -26,15 +27,15 @@ public enum Team {
         this.prefix = prefix;
     }
 
-    public org.bukkit.scoreboard.Team getScoreboardTeam(){
+    public org.bukkit.scoreboard.Team getScoreboardTeam(GamePlayer player){
         String teamName = toString().toLowerCase();
 
-        Scoreboard mainScoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-        org.bukkit.scoreboard.Team scoreboardTeam = mainScoreboard.getTeam(teamName);
+        Scoreboard scoreboard = player.getPlayer().getScoreboard();
+        org.bukkit.scoreboard.Team scoreboardTeam = scoreboard.getTeam(teamName);
 
         if (scoreboardTeam == null) {
-            mainScoreboard.registerNewTeam(teamName);
-            scoreboardTeam = mainScoreboard.getTeam(teamName);
+            scoreboard.registerNewTeam(teamName);
+            scoreboardTeam = scoreboard.getTeam(teamName);
             scoreboardTeam.setNameTagVisibility(NameTagVisibility.ALWAYS);
             scoreboardTeam.setPrefix(getNameColor());
         }
@@ -42,7 +43,6 @@ public enum Team {
     }
 
     public void clearPlayers(){
-        getScoreboardTeam().unregister();
     }
 
     /**
@@ -64,8 +64,11 @@ public enum Team {
 
     public void addPlayer(GamePlayer player){
         players.add(player);
-        //getScoreboardTeam().addPlayer(player.getPlayer());
 
+        for(GamePlayer p : GameManager.getPlayers()){
+            org.bukkit.scoreboard.Team scoreboardTeam = getScoreboardTeam(p);
+            scoreboardTeam.addPlayer(player.getPlayer());
+        }
         player.setTeam(this);
     }
 
@@ -75,9 +78,20 @@ public enum Team {
 
     public void removePlayer(GamePlayer player){
         players.remove(player);
-        //getScoreboardTeam().removePlayer(player.getPlayer());
+        for(GamePlayer p : GameManager.getPlayers()){
+            org.bukkit.scoreboard.Team scoreboardTeam = getScoreboardTeam(p);
+            scoreboardTeam.removePlayer(player.getPlayer());
+        }
 
         player.setTeam(null);
+    }
+
+    public static Team fromName(String name){
+        for(Team team : values()){
+            if(team.toString().equalsIgnoreCase(name))
+                return team;
+        }
+        return null;
     }
 
     public String getPrefix() {

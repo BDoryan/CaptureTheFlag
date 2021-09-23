@@ -17,6 +17,5 @@ public class ScoreboardRunnable implements Runnable {
     @Override
     public void run() {
         GameManager.getPlayers().forEach(gamePlayer -> gamePlayer.updateScoreboard());
-        Logger.debug("ScoreboardRunnable : run();");
     }
 }

@@ -6,3 +6,31 @@ locations:
     z: 0
     yaw: 0
     pitch: 0
+maps:
+  default:
+    red:
+      spawn:
+        name: "default"
+        x: 0
+        y: 0
+        z: 0
+        yaw: 0
+        pitch: 0
+      flag:
+        name: "default"
+        x: 0
+        y: 0
+        z: 0
+    blue:
+      spawn:
+        name: "default"
+        x: 0
+        y: 0
+        z: 0
+        yaw: 0
+        pitch: 0
+      flag:
+        name: "default"
+        x: 0
+        y: 0
+        z: 0
