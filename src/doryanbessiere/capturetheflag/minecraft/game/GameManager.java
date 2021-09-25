@@ -7,10 +7,7 @@ import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.map.Map;
 import doryanbessiere.capturetheflag.minecraft.map.MapManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
-import doryanbessiere.capturetheflag.minecraft.schedulers.GameFinishRunnable;
-import doryanbessiere.capturetheflag.minecraft.schedulers.GameRunnable;
-import doryanbessiere.capturetheflag.minecraft.schedulers.GameStartingRunnable;
-import doryanbessiere.capturetheflag.minecraft.schedulers.ScoreboardRunnable;
+import doryanbessiere.capturetheflag.minecraft.schedulers.*;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -99,9 +96,31 @@ public class GameManager {
     }
 
     public static void finish(Team team) {
-        Bukkit.getWorlds().get(0).setTime(15000);
-        getPlayers().forEach(gamePlayer -> lobby(gamePlayer));
-        new GameFinishRunnable(team).start();
+        for(Team t : Team.values()){
+            if(t == team){
+                t.getPlayers().forEach((gamePlayer) -> {
+                    Player player = gamePlayer.getPlayer();
+                    player.sendTitle("§2Victoire", "§aVotre équipe à gagné !");
+                });
+            } else if (team != null){
+                t.getPlayers().forEach((gamePlayer) -> {
+                    Player player = gamePlayer.getPlayer();
+                    player.sendTitle("§cDéfaite", "§7Vous vous êtes bien battue !");
+                });
+            } else {
+                t.getPlayers().forEach((gamePlayer) -> {
+                    Player player = gamePlayer.getPlayer();
+                    player.sendTitle("§8Égalité", "§7Aucune équipe n'a réussi à se démarquer.");
+                });
+            }
+        }
+        getPlayers().forEach(gamePlayer -> {
+            lobby(gamePlayer);
+        });
+        if(team != null){
+            Bukkit.getWorlds().get(0).setTime(15000);
+            new FireworksRunnable(team).start();
+        }
     }
 
     public static GameStartingRunnable startingRunnable;
@@ -128,6 +147,7 @@ public class GameManager {
                 getPlayers().forEach(gamePlayer -> {
                     Player player = gamePlayer.getPlayer();
                     player.setGameMode(GameMode.SURVIVAL);
+                    gamePlayer.spawn();
                 });
                 gameRunnable = new GameRunnable();
                 gameRunnable.start();
@@ -174,6 +194,7 @@ public class GameManager {
 
     public static void init(){
         new ScoreboardRunnable().start();
+        new PlayerRunnable().start();
         Bukkit.getWorlds().get(0).setTime(8000);
 
         Arrays.asList(Team.values()).forEach(team -> team.clearPlayers());

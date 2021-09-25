@@ -42,7 +42,7 @@ public class PlayerInteractListener implements Listener {
             Block block = event.getClickedBlock();
 
             if(block != null && block.getType() == Material.STANDING_BANNER){
-                if(block.getLocation().distance(player.getLocation() )> 3){
+                if(block.getLocation().distance(player.getLocation()) > 4 || GameManager.getMap().getAreas().get(gamePlayer.getTeam()).isInCube(player.getLocation())){
                     return;
                 }
 

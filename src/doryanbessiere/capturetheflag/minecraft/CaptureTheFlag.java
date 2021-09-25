@@ -2,9 +2,11 @@ package doryanbessiere.capturetheflag.minecraft;
 
 import doryanbessiere.capturetheflag.minecraft.command.CTFCommandManager;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
+import doryanbessiere.capturetheflag.minecraft.commons.logger.LoggerType;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.listener.ListenersManager;
 import doryanbessiere.capturetheflag.minecraft.map.MapManager;
+import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -46,6 +48,16 @@ public class CaptureTheFlag extends JavaPlugin {
 
         GameManager.init();
         Logger.debug("Initialization of the game : OK");
+
+        /**
+         * Obliger de brider car le plugin est code de manière
+         * à ce qu'il n'est qu'une équipe. (surtout pour le système de boussole)
+         */
+        if(Team.values().length > 2){
+            Logger.log(LoggerType.FATALERROR, "CaptureTheFlag : Two teams maximums!");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
 
         Logger.info("CaptureTheFlag : OK");
 

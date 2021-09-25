@@ -40,7 +40,11 @@ public class PlayerMoveListener implements Listener {
                     && lastLocation.getBlockZ() == to.getBlockZ()) return;
 
             if(to.getY() < 0){
-                gamePlayer.death();
+                if(GameManager.isState(GameState.INGAME)){
+                    gamePlayer.death();
+                } else {
+                    GameManager.teleportToLobby(gamePlayer.getPlayer());
+                }
                 return;
             }
 

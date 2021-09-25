@@ -151,7 +151,7 @@ public class Flag {
         this.carrier.getTeam().capture();
         this.carrier = null;
 
-        GameManager.getMap().getWorld().strikeLightningEffect(carrier.getPlayer().getLocation());
+        GameManager.getMap().getWorld().strikeLightningEffect(carrier.getTeam().getFlag().getLocation());
 
         location = base;
         CaptureTheFlag.broadcast("§c"+carrier.getTeam().getNameColor()+carrier.getName()+" §7a déposé le drapeau "+team.getNameColor()+team.getName()+"§7 dans son camp!");
@@ -193,9 +193,7 @@ public class Flag {
     }
 
     public boolean atBase(){
-        return location.getBlockX() == base.getBlockX() &&
-                location.getBlockY() == base.getBlockY() &&
-                location.getBlockZ() == base.getBlockZ();
+        return Commons.compareLocation(location, base);
     }
 
     public boolean compareLocation(Location location) {
@@ -212,6 +210,10 @@ public class Flag {
                 Flag flag = team.getFlag();
 
                 if(Commons.compareLocation(flag.getLocation(), to)){
+                    if(flag.getCarrier() != null){
+                        Logger.debug("stolen() or returnToBase() : if(flag.getCarrier() != null); "+(flag.getCarrier() != null));
+                        return;
+                    }
                     if(!flag.atBase() && flag.getTeam() == gamePlayer.getTeam()) {
                         flag.returnToBase(gamePlayer);
                     } else if(flag.getTeam() != gamePlayer.getTeam()){
@@ -221,10 +223,27 @@ public class Flag {
             }
         } else {
             Flag flag = gamePlayer.getTeam().getFlag();
+            if(gamePlayer.getFlag().getCarrier() == null){
+                Logger.debug("capture() : if(gamePlayer.getFlag().getCarrier() == null); "+(gamePlayer.getFlag().getCarrier() == null));
+                return;
+            }
 
             if(flag.compareBase(to)){
+                if(!gamePlayer.getTeam().getFlag().atBase()) {
+                    gamePlayer.sendMessage("§cVous devez avoir votre drapeau !");
+                    return;
+                }
                 gamePlayer.getFlag().capture(gamePlayer);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Flag{" +
+                "team=" + team +
+                ", carrier=" + carrier +
+                ", base=" + base +
+                '}';
     }
 }

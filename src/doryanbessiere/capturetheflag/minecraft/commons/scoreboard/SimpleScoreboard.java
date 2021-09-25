@@ -61,6 +61,10 @@ public class SimpleScoreboard {
 		scores.put(text, score);
 	}
 
+	public Map<String, Integer> getScores() {
+		return scores;
+	}
+
 	public boolean remove(Integer score, String text) {
 		return remove(score, text, true);
 	}

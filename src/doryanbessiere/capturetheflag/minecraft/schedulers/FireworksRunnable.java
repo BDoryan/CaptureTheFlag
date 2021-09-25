@@ -16,18 +16,18 @@ import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.Random;
 
-public class GameFinishRunnable implements Runnable {
+public class FireworksRunnable implements Runnable {
 
     private int task;
     private Team team;
 
-    public GameFinishRunnable(Team team) {
+    public FireworksRunnable(Team team) {
         this.team = team;
     }
 
     public void start(){
-        this.task = Bukkit.getScheduler().scheduleSyncRepeatingTask(CaptureTheFlag.getInstance(), this,0, 20);
-        Logger.debug("GameFinishRunnable : start.");
+        this.task = Bukkit.getScheduler().scheduleSyncRepeatingTask(CaptureTheFlag.getInstance(), this,0, 30);
+        Logger.debug("FireworksRunnable : start.");
     }
 
     public void cancel() {
@@ -43,7 +43,7 @@ public class GameFinishRunnable implements Runnable {
             FireworkMeta fm = firework.getFireworkMeta();
             Random random = new Random();
             fm.addEffect(FireworkEffect.builder().flicker(false).trail(false).with(FireworkEffect.Type.values()[random.nextInt(FireworkEffect.Type.values().length - 1)])
-                    .withColor(team == null ? Color.GRAY : team.getColor(), Color.YELLOW, Color.WHITE).build());
+                    .withColor(team == null ? Color.GRAY : team.getColor(), Color.WHITE).build());
             fm.setPower(0);
             firework.setFireworkMeta(fm);
 

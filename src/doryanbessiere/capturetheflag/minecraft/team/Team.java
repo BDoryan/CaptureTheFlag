@@ -16,7 +16,7 @@ import java.util.Locale;
 public enum Team {
 
     RED("§c", DyeColor.RED, Color.RED,"Rouge", "§7[§cRouge§7]", null),
-    BLUE("§9",  DyeColor.BLUE, Color.RED,"Bleu","§7[§bBlue§7]", null);
+    BLUE("§9",  DyeColor.BLUE, Color.BLUE,"Bleu","§7[§bBlue§7]", null);
 
     public static final int MAX_CAPTURE = 3;
 

@@ -2,13 +2,16 @@ package doryanbessiere.capturetheflag.minecraft.player;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
+import doryanbessiere.capturetheflag.minecraft.commons.items.ItemBuilder;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
+import doryanbessiere.capturetheflag.minecraft.compass.Compass;
 import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.player.scoreboard.PlayerScoreboard;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -25,7 +28,7 @@ public class GamePlayer {
     private Team team;
     private PlayerScoreboard scoreboard;
     private String name;
-
+    private Compass compass;
     private Flag flag;
 
     private ArrayList<Cuboid> areas = new ArrayList<>();
@@ -33,6 +36,9 @@ public class GamePlayer {
     public GamePlayer(Player player) {
         this.player = player;
         this.name = player.getName();
+
+        this.compass = new Compass(this);
+
         this.scoreboard = new PlayerScoreboard(this);
         this.scoreboard.create();
 
@@ -165,13 +171,25 @@ public class GamePlayer {
         if(flag != null)
             flag.drop();
 
-        clearAllInventory();
-        clearLevel();
-        heal();
-        feed();
+        clean();
 
         respawn();
         deaths++;
+    }
+
+    public void spawn(){
+        player.setGameMode(GameMode.SURVIVAL);
+        player.getEquipment().setHelmet(new ItemBuilder(Material.LEATHER_HELMET).toItemStack());
+        player.getEquipment().setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE).toItemStack());
+        player.getEquipment().setLeggings(new ItemBuilder(Material.LEATHER_LEGGINGS).toItemStack());
+        player.getEquipment().setBoots(new ItemBuilder(Material.LEATHER_BOOTS).toItemStack());
+
+        player.getInventory().setItem(0, new ItemBuilder(Material.IRON_SWORD).toItemStack());
+        this.compass.giveCompass();
+    }
+
+    public void update(){
+        compass.update();
     }
 
     private boolean hasRespawn = true;
@@ -189,7 +207,7 @@ public class GamePlayer {
                 if(respawnLeft == 0){
                     respawnLeft= 5;
                     hasRespawn = true;
-                    player.setGameMode(GameMode.SURVIVAL);
+                    spawn();
                     Bukkit.getScheduler().cancelTask(respawnTask);
                     player.sendTitle("", "");
                     return;
@@ -198,6 +216,22 @@ public class GamePlayer {
                 respawnLeft--;
             }
         }, 0, 20);
+    }
+
+    @Override
+    public String toString() {
+        return "GamePlayer{" +
+                "team=" + team +
+                ", scoreboard=" + scoreboard +
+                ", name='" + name + '\'' +
+                ", flag=" + flag +
+                ", areas=" + areas +
+                ", hasRespawn=" + hasRespawn +
+                ", respawnLeft=" + respawnLeft +
+                ", respawnTask=" + respawnTask +
+                ", kills=" + kills +
+                ", deaths=" + deaths +
+                '}';
     }
 
     public boolean hasRespawn() {
@@ -213,5 +247,9 @@ public class GamePlayer {
 
     public int getDeaths() {
         return deaths;
+    }
+
+    public void kill() {
+        kills++;
     }
 }

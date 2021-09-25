@@ -1,5 +1,6 @@
 package doryanbessiere.capturetheflag.minecraft.player.scoreboard;
 
+import doryanbessiere.capturetheflag.minecraft.command.commands.TeamChatCommand;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.commons.scoreboard.SimpleScoreboard;
 import doryanbessiere.capturetheflag.minecraft.flag.Flag;
@@ -55,7 +56,6 @@ public class PlayerScoreboard extends SimpleScoreboard {
             delete();
             create();
             state = GameManager.getState();
-            Logger.debug("reset");
         }
 
         setTitle(titles[index]);
@@ -76,14 +76,15 @@ public class PlayerScoreboard extends SimpleScoreboard {
             lines.put(20, "§8§m-------------------");
             int index = 19;
             for(Team team : Team.values()){
-                lines.put(index, team.getNameColor()+team.getNameColor()+team.getName()+ " §f: §f"+team.getCapture()+"§7/§f3");
                 Flag flag = team.getFlag();
-                lines.put(index - 1, " §fDrapeau §6» "+(flag.hasCarrier() ? "§7["+"§c"+flag.getCarrier().getName()+"§7]" : flag.atBase() ? "§7["+team.getNameColor()+"Home"+"§7]" : ""));
+
+                lines.put(index, team.getNameColor()+team.getNameColor()+team.getName()+ " §f: §f"+team.getCapture()+"§7/§f3");
+                lines.put(index - 1, " §fDrapeau §6» "+(flag.hasCarrier() ? "§7["+flag.getCarrier().getTeam().getNameColor()+flag.getCarrier().getName()+"§7]" : flag.atBase() ? "§7["+team.getNameColor()+"Home"+"§7]" : ""));
                 index-=2;
+
                 if(!flag.hasCarrier()  && !flag.atBase()){
-                    lines.put(index - 1, "   §eX §6» §d"+flag.getLocation().getBlockX());
-                    lines.put(index - 2, "   §eZ §6» §d"+flag.getLocation().getBlockZ());
-                    index-=2;
+                    lines.put(index, "   §6» §d"+flag.getLocation().getBlockX()+"x, "+flag.getLocation().getBlockZ()+"z");
+                    index--;
                 }
             }
             lines.put(11, "§e§6");
@@ -102,27 +103,34 @@ public class PlayerScoreboard extends SimpleScoreboard {
 
         }
 
-        for (Integer slot : lines.keySet()) {
-            String line = lines.get(slot);
-            add(line, slot);
-        }
-
-        for (int loc = 15; loc > 0; loc--) {
+        /**
+         * IMPORTANT :
+         * Il est important de commencer par supprimer les lignes qui n'existe plus et pas
+         * la suite mettre à jour ou rajouter les lignes
+         */
+        for (int loc = 20; loc > 0; loc--) {
             String myLine = lines.get(loc);
             String sbLine = this.get(loc);
 
-            if (myLine == null && sbLine != null) {
-                this.remove(loc);
-                this.reset();
-            } else {
-                if (sbLine != null && myLine != null) {
-                    if (!sbLine.equals(myLine)) {
-                        this.remove(loc, sbLine);
-                        this.add(myLine, loc);
-                    }
+            if(!lines.containsKey(loc)){
+                if(sbLine != null){
+                    this.remove(loc);
                 }
             }
         }
+        for (int loc = 20; loc > 0; loc--) {
+            String myLine = lines.get(loc);
+            if(myLine == null)continue;
+            String sbLine = this.get(loc);
+
+            if (sbLine != null && myLine != null && !sbLine.equals(myLine)) {
+                this.remove(loc, sbLine);
+                this.add(myLine, loc);
+            } else if (sbLine == null){
+                this.add(myLine, loc);
+            }
+        }
+
         super.update();
         lines.clear();
 

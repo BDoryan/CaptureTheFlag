@@ -10,7 +10,6 @@ public class ListenersManager {
     public static void listen(Plugin plugin){
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new PlayerConnectionListener(), plugin);
-        pluginManager.registerEvents(new EntitySpawnListener(), plugin);
         pluginManager.registerEvents(new LoggerListener(), plugin);
         pluginManager.registerEvents(new WeatherChangeListener(), plugin);
         pluginManager.registerEvents(new FoodLevelChangeListener(), plugin);
@@ -19,5 +18,9 @@ public class ListenersManager {
         pluginManager.registerEvents(new PlayerInteractListener(), plugin);
         pluginManager.registerEvents(new PlayerMoveListener(), plugin);
         pluginManager.registerEvents(new PlayerTeleportListener(), plugin);
+        pluginManager.registerEvents(new AsyncPlayerChatListener(), plugin);
+        pluginManager.registerEvents(new PlayerDeathListener(), plugin);
+        pluginManager.registerEvents(new PlayerDropItemListener(), plugin);
+        pluginManager.registerEvents(new InventoryClickListener(), plugin);
     }
 }
