@@ -1,6 +1,7 @@
 package doryanbessiere.capturetheflag.minecraft.listener.listeners;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
+import doryanbessiere.capturetheflag.minecraft.compass.Compass;
 import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
@@ -24,6 +25,12 @@ public class PlayerInteractListener implements Listener {
         GamePlayer gamePlayer = GameManager.getGamePlayer(player);
 
         ItemStack itemStack = player.getItemInHand();
+        if(itemStack != null && itemStack.getType() == Material.COMPASS && gamePlayer.getCompass().compare(itemStack)){
+            Compass compass = gamePlayer.getCompass();
+            compass.switchMode();
+            gamePlayer.sendMessage("§7Vous êtes désormais en mode §f"+compass.getCompassMode().toString().toLowerCase()+"§7 !");
+        }
+
         if(itemStack != null &&
                 itemStack.hasItemMeta() &&
                 itemStack.getItemMeta().getDisplayName().

@@ -18,7 +18,7 @@ public class AsyncPlayerChatListener implements Listener {
 
         if(GameManager.isState(GameState.INGAME)){
             Team team = gamePlayer.getTeam();
-            event.setFormat(team.getNameColor()+"» " +player.getName()+"§7: §f"+ event.getMessage());
+            event.setFormat(team.getNameColor()+">> §7" +player.getName()+": §f"+ event.getMessage());
         } else {
             event.setFormat("§7"+player.getName()+": §f"+event.getMessage());
         }

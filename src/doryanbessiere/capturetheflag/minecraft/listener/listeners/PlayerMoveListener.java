@@ -39,15 +39,6 @@ public class PlayerMoveListener implements Listener {
             if (lastLocation.getBlockX() == to.getBlockX() && lastLocation.getBlockY() == to.getBlockY()
                     && lastLocation.getBlockZ() == to.getBlockZ()) return;
 
-            if(to.getY() < 0){
-                if(GameManager.isState(GameState.INGAME)){
-                    gamePlayer.death();
-                } else {
-                    GameManager.teleportToLobby(gamePlayer.getPlayer());
-                }
-                return;
-            }
-
             if(!gamePlayer.hasRespawn()){
                 event.getFrom().setPitch(event.getTo().getPitch());
                 event.getFrom().setYaw(event.getTo().getYaw());

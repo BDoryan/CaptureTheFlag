@@ -73,8 +73,13 @@ public class PlayerScoreboard extends SimpleScoreboard {
             lines.put(2, "§f§8§m-------------------");
             lines.put(1, "§7play.enantia.fr");
         } else if(GameManager.isState(GameState.INGAME)){
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
+            String time = simpleDateFormat.format(new Date(GameManager.getGameRunnable().getSeconds() * 1000));
+
             lines.put(20, "§8§m-------------------");
-            int index = 19;
+            lines.put(19, "§fTemps restant §6» §d"+time);
+            lines.put(18, "§e");
+            int index = 17;
             for(Team team : Team.values()){
                 Flag flag = team.getFlag();
 
@@ -91,10 +96,6 @@ public class PlayerScoreboard extends SimpleScoreboard {
             lines.put(10, "§fKills §6» §c"+player.getKills());
             lines.put(9, "§fMorts §6» §c"+player.getDeaths());
             lines.put(8, "§f§e");
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
-            String time = simpleDateFormat.format(new Date(GameManager.getGameRunnable().getSeconds() * 1000));
-            lines.put(7, "§eTemps restant §6» §c"+time);
-            lines.put(5, "§e");
             lines.put(4, "§eKit §6» §cpas disponible");
             lines.put(3, "§eMap §6» §c"+GameManager.getMap().getName());
             lines.put(2, "§f§8§m-------------------");

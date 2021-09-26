@@ -8,7 +8,7 @@ import org.bukkit.Bukkit;
 public class PlayerRunnable implements Runnable {
 
     public void start(){
-        Bukkit.getScheduler().scheduleAsyncRepeatingTask(CaptureTheFlag.getInstance(), this,0, 5);
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(CaptureTheFlag.getInstance(), this,0, 5);
         Logger.debug("PlayerRunnable : start.");
     }
 

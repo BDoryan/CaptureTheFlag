@@ -63,6 +63,8 @@ public class Flag {
             this.location.getBlock().setType(Material.AIR);
         }
 
+        this.location = gamePlayer.getPlayer().getLocation();
+
         Player player = gamePlayer.getPlayer();
         ItemStack banner_item = new ItemBuilder(Material.BANNER).setName(team.getNameColor()+"Drapeau de l'équipe "+team.getName()).toItemStack();
         BannerMeta banner = (BannerMeta) banner_item.getItemMeta();
@@ -104,7 +106,7 @@ public class Flag {
         while(true){
             ground.add(0, -1, 0);
 
-            if(ground.getBlock().getType() != Material.AIR)
+            if(ground.getBlock().getType() != Material.AIR && !ground.getBlock().isLiquid())
                 break;
 
             if(ground.getBlockY() < 0)
@@ -205,23 +207,22 @@ public class Flag {
     }
 
     public static void interact(GamePlayer gamePlayer, Location to){
-        if(gamePlayer.getFlag() == null){
-            for(Team team : Team.values()){
-                Flag flag = team.getFlag();
+        for(Team team : Team.values()) {
+            Flag flag = team.getFlag();
 
-                if(Commons.compareLocation(flag.getLocation(), to)){
-                    if(flag.getCarrier() != null){
-                        Logger.debug("stolen() or returnToBase() : if(flag.getCarrier() != null); "+(flag.getCarrier() != null));
-                        return;
-                    }
-                    if(!flag.atBase() && flag.getTeam() == gamePlayer.getTeam()) {
-                        flag.returnToBase(gamePlayer);
-                    } else if(flag.getTeam() != gamePlayer.getTeam()){
-                        flag.stolen(gamePlayer);
-                    }
+            if (Commons.compareLocation(flag.getLocation(), to)) {
+                if (flag.getCarrier() != null) {
+                    Logger.debug("stolen() or returnToBase() : if(flag.getCarrier() != null); " + (flag.getCarrier() != null));
+                    return;
+                }
+                if (!flag.atBase() && flag.getTeam() == gamePlayer.getTeam()) {
+                    flag.returnToBase(gamePlayer);
+                } else if (gamePlayer.getFlag() == null && flag.getTeam() != gamePlayer.getTeam()) {
+                    flag.stolen(gamePlayer);
                 }
             }
-        } else {
+        }
+        if(gamePlayer.getFlag() != null){
             Flag flag = gamePlayer.getTeam().getFlag();
             if(gamePlayer.getFlag().getCarrier() == null){
                 Logger.debug("capture() : if(gamePlayer.getFlag().getCarrier() == null); "+(gamePlayer.getFlag().getCarrier() == null));

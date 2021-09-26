@@ -17,6 +17,10 @@ public class PlayerTeleportListener implements Listener {
         GamePlayer gamePlayer = GameManager.getGamePlayer(player);
 
         if(!GameManager.isState(GameState.INGAME))return;
+        if(event.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL && !gamePlayer.hasRespawn()){
+            event.setCancelled(true);
+            return;
+        }
         GameManager.getMap().getAreas().forEach((team, area) -> {
             if(team != gamePlayer.getTeam() && area.isInCube(event.getTo())){
                 event.setCancelled(true);

@@ -9,7 +9,9 @@ import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.listener.listeners.LoggerListener;
 import doryanbessiere.capturetheflag.minecraft.map.Map;
 import doryanbessiere.capturetheflag.minecraft.map.MapManager;
+import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -136,6 +138,8 @@ public class CaptureTheFlagCommand extends SimpleCommand {
              * - /ctf map setspawn <blue|red>
              * - /ctf map setflaf <blue|red>
              * - /ctf map setzone <blue|red>
+             *
+             * - /ctf setteam <player> <team>
              */
             String arg1 = arguments[0];
             String arg2 = arguments[1];
@@ -247,6 +251,28 @@ public class CaptureTheFlagCommand extends SimpleCommand {
                 } else {
                     CaptureTheFlag.sendMessage(sender, "§cCommande inconnue, essayer: §e/ctf help");
                 }
+            } else if (arg1.equalsIgnoreCase("setteam")){
+                Player target = Bukkit.getPlayer(arg2);
+                if(target == null){
+                    CaptureTheFlag.sendMessage(sender, "§cCe joueur n'est pas en ligne !");
+                    return false;
+                }
+
+                Team team = Team.fromName(arg3);
+                if(team != null){
+                    GamePlayer gameTarget = GameManager.getGamePlayer(target);
+                    if(gameTarget.getTeam() == team){
+                        CaptureTheFlag.sendMessage(sender, "§cCe joueur est déjà dans cette équipe !");
+                        return false;
+                    }
+                    gameTarget.getTeam().removePlayer(gameTarget);
+                    team.addPlayer(gameTarget);
+                    gameTarget.death();
+                    CaptureTheFlag.sendMessage(target, "§f"+sender.getName()+" §7vous a mis dans l'équipe "+team.getNameColor()+team.getName());
+                    CaptureTheFlag.sendMessage(sender, "§f"+target.getName()+" §7est désormais dans l'équipe "+team.getNameColor()+team.getName());
+                } else {
+                    CaptureTheFlag.sendMessage(sender, "§cCette équipe n'existe pas !");
+                }
             } else {
                 CaptureTheFlag.sendMessage(sender, "§cCommande inconnue, essayer: §e/ctf help");
             }
@@ -285,6 +311,9 @@ public class CaptureTheFlagCommand extends SimpleCommand {
     @Override
     public void onHelp(CommandSender sender) {
         sender.sendMessage(Commons.lineSeparator("CaptureTheFlag"));
+        sender.sendMessage("  §7- /ctf setteam §7<joueur> <blue|red>");
+        sender.sendMessage("    §fPermet de rajouter, retirer, et de se téléporter à une map");
+        sender.sendMessage(" ");
         sender.sendMessage("  §7- /ctf map §7<add|remove|teleport> <map>");
         sender.sendMessage("    §fPermet de rajouter, retirer, et de se téléporter à une map");
         sender.sendMessage(" ");

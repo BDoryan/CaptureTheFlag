@@ -188,6 +188,10 @@ public class GamePlayer {
         this.compass.giveCompass();
     }
 
+    public Compass getCompass() {
+        return compass;
+    }
+
     public void update(){
         compass.update();
     }
@@ -197,8 +201,8 @@ public class GamePlayer {
     private int respawnTask;
 
     public void respawn(){
-        hasRespawn = false;
         player.teleport(GameManager.getMap().getSpawns().get(team));
+        hasRespawn = false;
         player.setGameMode(GameMode.SPECTATOR);
 
         respawnTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(CaptureTheFlag.getInstance(), new Runnable() {

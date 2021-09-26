@@ -8,5 +8,6 @@ public class WorldManager {
 
     public static void initWorld(World world){
         world.setGameRuleValue("doDaylightCycle", "false");
+        world.setGameRuleValue("naturalRegeneration", "false");
     }
 }

@@ -44,7 +44,7 @@ public class TeamChatCommand extends SimpleCommand {
         Team team = gamePlayer.getTeam();
         String finalMessage = message;
         team.getPlayers().forEach((gameMember -> {
-            gameMember.getPlayer().sendMessage("§7[TEAM] "+team.getNameColor()+"» " +player.getName()+"§7: §f"+ finalMessage);
+            gameMember.getPlayer().sendMessage("§7[TEAM] "+team.getNameColor()+">> §7" +player.getName()+": §f"+ finalMessage);
         }));
         return false;
     }
