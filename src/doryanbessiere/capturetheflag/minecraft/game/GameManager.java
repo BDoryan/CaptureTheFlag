@@ -1,6 +1,7 @@
 package doryanbessiere.capturetheflag.minecraft.game;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
+import doryanbessiere.capturetheflag.minecraft.commons.Commons;
 import doryanbessiere.capturetheflag.minecraft.commons.config.ConfigurationUtils;
 import doryanbessiere.capturetheflag.minecraft.commons.items.ItemBuilder;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
@@ -20,12 +21,13 @@ import java.util.*;
 
 public class GameManager {
 
-    public static int MIN_PLAYERS = 6;
+    public static int MIN_PLAYERS = 2;
     public static int MAX_PLAYERS = 40;
 
     private static HashMap<String, GamePlayer> players = new HashMap<>();
     private static GameState state = GameState.WAITING;
     private static Map map = null;
+    private static GameStartingRunnable gameStartingRunnable;
     private static GameRunnable gameRunnable;
 
     public static final ItemStack WAND = new ItemBuilder(Material.STICK).setName("§6Outil de zone §7(clic-droit ou clic-gauche)").toItemStack();
@@ -58,6 +60,10 @@ public class GameManager {
                 Bukkit.broadcastMessage(CaptureTheFlag.getPrefix()+"§7Il faut minimum "+MIN_PLAYERS+" joueurs afin que la partie se lance..");
             }*/
             lobby(gamePlayer);
+
+            if(getPlayers().size() >= MIN_PLAYERS && gameStartingRunnable == null){
+                start(false);
+            }
         } else if (isState(GameState.INGAME)){
             joinGame(gamePlayer);
         }
@@ -127,8 +133,6 @@ public class GameManager {
         }
     }
 
-    public static GameStartingRunnable startingRunnable;
-
     /**
      * Starting the game (can be forced)
      *
@@ -142,7 +146,18 @@ public class GameManager {
         Runnable runnable = new Runnable(){
             @Override
             public void run() {
-
+                if(gameStartingRunnable != null){
+                    gameStartingRunnable.cancel();
+                    gameStartingRunnable = null;
+                }
+                if(!force){
+                    if(getPlayers().size() < MIN_PLAYERS) {
+                        getPlayers().forEach(gamePlayer -> {
+                            Commons.sendActionBar(gamePlayer.getPlayer(),"§cLa partie ne peut pas se lancer, vous devez être minimum " + MIN_PLAYERS + " joueurs.");
+                        });
+                        return;
+                    }
+                }
                 randomTeam();
                 getPlayers().forEach(gamePlayer -> {
                     gamePlayer.spawn();
@@ -158,8 +173,8 @@ public class GameManager {
             Logger.debug("The game is started by force.");
             runnable.run();
         } else {
-            startingRunnable = new GameStartingRunnable(runnable);
-            startingRunnable.start();
+            gameStartingRunnable = new GameStartingRunnable(runnable);
+            gameStartingRunnable.start();
         }
     }
 
@@ -186,15 +201,19 @@ public class GameManager {
         List<GamePlayer> players = new ArrayList<>();
         players.addAll(getPlayers());
 
+        Logger.debug(players.size()+"");
         if(players.size() == 1){
             Team.logicTeam(players.get(0));
         } else if (players.size() > 1){
             GamePlayer player = null;
             Random random = new Random();
             while(true){
-                player = players.get(random.nextInt(players.size()) - 1);
+                int target = players.size() > 1 ? random.nextInt(players.size()  - 1) : 0;
+                player = players.get(target);
                 Team.logicTeam(player);
                 players.remove(player);
+
+                if(players.size() == 0)break;
             }
         }
     }

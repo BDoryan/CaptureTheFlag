@@ -34,6 +34,7 @@ public class GamePlayer {
 
     private ItemStack old_helmet;
     private boolean canProjection = true;
+    private boolean projected = false;
 
     private ArrayList<Cuboid> areas = new ArrayList<>();
 
@@ -47,6 +48,14 @@ public class GamePlayer {
         this.scoreboard.create();
 
         setTeam(null);
+    }
+
+    public void setProjected(boolean projected) {
+        this.projected = projected;
+    }
+
+    public boolean isProjected() {
+        return projected;
     }
 
     public void enter(Cuboid area){
@@ -182,6 +191,7 @@ public class GamePlayer {
     }
 
     public void spawn(){
+        clean();
         player.setGameMode(GameMode.SURVIVAL);
         player.getEquipment().setHelmet(new ItemBuilder(Material.LEATHER_HELMET).toItemStack());
         player.getEquipment().setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE).toItemStack());

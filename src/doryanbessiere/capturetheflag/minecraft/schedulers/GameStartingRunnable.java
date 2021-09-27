@@ -29,13 +29,13 @@ public class GameStartingRunnable implements Runnable {
 
     @Override
     public void run() {
+        GameManager.getPlayers().forEach(player -> player.getPlayer().setLevel(seconds));
         if(seconds==0) {
             cancel();
             runnable.run();
             return;
         }
 
-        GameManager.getPlayers().forEach(player -> player.getPlayer().setLevel(seconds));
         seconds--;
     }
 }

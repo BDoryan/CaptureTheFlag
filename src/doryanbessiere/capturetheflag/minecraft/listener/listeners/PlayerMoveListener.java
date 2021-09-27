@@ -6,6 +6,8 @@ import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.game.GameState;
+import doryanbessiere.capturetheflag.minecraft.map.Map;
+import doryanbessiere.capturetheflag.minecraft.map.MapManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import doryanbessiere.capturetheflag.minecraft.projector.ProjectorBlock;
 import doryanbessiere.capturetheflag.minecraft.projector.ProjectorConfig;
@@ -20,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PlayerMoveListener implements Listener {
@@ -33,29 +36,41 @@ public class PlayerMoveListener implements Listener {
         Location to = event.getTo();
         Location from = event.getFrom();
 
-        if(!GameManager.isState(GameState.INGAME))return;
-
         Block groundBlock = player.getLocation().add(0, -1, 0).getBlock();
         if(groundBlock.getType() == Material.SLIME_BLOCK){
             if(gamePlayer.canProjection()){
-                ProjectorBlock projectorBlock = GameManager.getMap().getProjector(groundBlock.getLocation());
-                if(projectorBlock != null){
-                    ProjectorConfig config = projectorBlock.getConfig();
-                    player.teleport(new Location(player.getLocation().getWorld(), player.getLocation().getX(),player.getLocation().getY(),player.getLocation().getZ(), config.getYaw(), config.getPitch()));
-                    player.setVelocity(player.getLocation().getDirection().multiply(config.getPower()).setY(0.75));
-                    gamePlayer.setCanProjection(false);
+                Map map = MapManager.getMap(player.getLocation().getWorld().getName());
+                if(map != null){
+                    ProjectorBlock projectorBlock = map.getProjector(groundBlock.getLocation());
+                    if(projectorBlock != null){
+                        ProjectorConfig config = projectorBlock.getConfig();
 
-                    Bukkit.getScheduler().runTaskLater(CaptureTheFlag.getInstance(), new Runnable() {
-                        @Override
-                        public void run() {
-                            gamePlayer.setCanProjection(true);
-                        }
-                    }, 20 * 3);
-                } else {
-                    gamePlayer.sendMessage("§dCe bloc n'est pas un propulseur !");
+                        Vector vector = new Vector();
+                        double rotX = (double)config.getYaw();
+                        double rotY = (double)config.getPitch();
+                        vector.setY(-Math.sin(Math.toRadians(rotY)));
+                        double xz = Math.cos(Math.toRadians(rotY));
+                        vector.setX(-xz * Math.sin(Math.toRadians(rotX)));
+                        vector.setZ(xz * Math.cos(Math.toRadians(rotX)));
+
+                        player.setVelocity(vector.multiply(config.getPower()).setY(1));
+                        gamePlayer.setProjected(true);
+
+                        /*
+                        gamePlayer.setCanProjection(false);
+
+                        Bukkit.getScheduler().runTaskLater(CaptureTheFlag.getInstance(), new Runnable() {
+                            @Override
+                            public void run() {
+                                gamePlayer.setCanProjection(true);
+                            }
+                        }, 30);*/
+                    }
                 }
             }
         }
+
+        if(!GameManager.isState(GameState.INGAME))return;
 
         if (lastPlayerLocation.containsKey(player)) {
             Location lastLocation = lastPlayerLocation.get(player);

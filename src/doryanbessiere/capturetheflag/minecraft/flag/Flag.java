@@ -2,6 +2,7 @@ package doryanbessiere.capturetheflag.minecraft.flag;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.Commons;
+import doryanbessiere.capturetheflag.minecraft.commons.grief.GriefCommons;
 import doryanbessiere.capturetheflag.minecraft.commons.items.ItemBuilder;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
@@ -62,6 +63,7 @@ public class Flag {
 
         if(!atBase()){
             this.location.getBlock().setType(Material.AIR);
+            GriefCommons.recoverBlock(this.location);
         }
 
         this.location = gamePlayer.getPlayer().getLocation();
@@ -106,7 +108,6 @@ public class Flag {
         Location ground = oldCarrier.getPlayer().getLocation();
         while(true){
             ground.add(0, -1, 0);
-
             if(ground.getBlock().getType() != Material.AIR && !ground.getBlock().isLiquid())
                 break;
 
@@ -123,6 +124,10 @@ public class Flag {
         }
 
         this.location = ground.add(0, 1, 0);
+
+        if(this.location.getBlock().getType() != Material.AIR){
+            GriefCommons.addBlock(this.location.getBlock());
+        }
 
         Block bannerBlock = location.getBlock();
         bannerBlock.setType(Material.STANDING_BANNER);
@@ -172,8 +177,10 @@ public class Flag {
         bannerState.setBaseColor(team.getDyeColor());
         bannerState.update();
 
-        if(location != null)
+        if(location != null) {
             location.getBlock().setType(Material.AIR);
+            GriefCommons.recoverBlock(this.location);
+        }
 
         location = base;
         CaptureTheFlag.broadcast("§c"+carrier.getTeam().getNameColor()+carrier.getName()+" §7a ramené le drapeau "+team.getNameColor()+team.getName()+"§7 dans son camp!");
@@ -185,8 +192,10 @@ public class Flag {
         bannerState.setBaseColor(team.getDyeColor());
         bannerState.update();
 
-        if(location != null)
+        if(location != null) {
             location.getBlock().setType(Material.AIR);
+            GriefCommons.recoverBlock(this.location);
+        }
 
         location = base;
         CaptureTheFlag.broadcast("§dLe drapeau "+team.getNameColor()+team.getName()+" §da été reset.");

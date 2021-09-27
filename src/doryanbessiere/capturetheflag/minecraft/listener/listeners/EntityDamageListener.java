@@ -51,19 +51,26 @@ public class EntityDamageListener implements Listener {
     @EventHandler
     public void EntityDamageEvent_(EntityDamageEvent event){
         if(event.getEntity() instanceof Player){
+            Player victim = (Player) event.getEntity();
+            GamePlayer gameVictim = GameManager.getGamePlayer(victim);
+
             if(GameManager.isState(GameState.WAITING)){
                 event.setCancelled(true);
+                return;
+            }
+
+            if(gameVictim.isProjected() && event.getCause() == EntityDamageEvent.DamageCause.FALL){
+                event.setCancelled(true);
+                gameVictim.setProjected(false);
+                return;
             }
 
             if(GameManager.isState(GameState.INGAME)){
-                Player victim = (Player) event.getEntity();
 
                 if(cancelDamage.contains(victim)){
                     cancelDamage.remove(victim);
                     return;
                 }
-
-                GamePlayer gameVictim = GameManager.getGamePlayer(victim);
                 Map map = GameManager.getMap();
 
                 lastDamager.put(victim, null);

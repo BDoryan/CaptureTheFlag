@@ -34,7 +34,7 @@ public class Commons {
     }
 
     public static boolean compareLocation(Location location1, Location location2){
-        return location1.getBlockX() == location2.getBlockX()
+        return location1.getWorld().getName().equals(location2.getWorld().getName()) && location1.getBlockX() == location2.getBlockX()
                 && location1.getBlockY() == location2.getBlockY()
                 && location1.getBlockZ() == location2.getBlockZ();
     }
