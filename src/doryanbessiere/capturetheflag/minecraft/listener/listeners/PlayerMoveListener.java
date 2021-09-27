@@ -1,14 +1,19 @@
 package doryanbessiere.capturetheflag.minecraft.listener.listeners;
 
+import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.game.GameState;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
+import doryanbessiere.capturetheflag.minecraft.projector.ProjectorBlock;
+import doryanbessiere.capturetheflag.minecraft.projector.ProjectorConfig;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,8 +35,26 @@ public class PlayerMoveListener implements Listener {
 
         if(!GameManager.isState(GameState.INGAME))return;
 
-        if(player.getLocation().add(0, -1, 0).getBlock().getType() == Material.SLIME_BLOCK){
-            player.setVelocity(player.getLocation().getDirection().multiply(2).setY(0.75));
+        Block groundBlock = player.getLocation().add(0, -1, 0).getBlock();
+        if(groundBlock.getType() == Material.SLIME_BLOCK){
+            if(gamePlayer.canProjection()){
+                ProjectorBlock projectorBlock = GameManager.getMap().getProjector(groundBlock.getLocation());
+                if(projectorBlock != null){
+                    ProjectorConfig config = projectorBlock.getConfig();
+                    player.teleport(new Location(player.getLocation().getWorld(), player.getLocation().getX(),player.getLocation().getY(),player.getLocation().getZ(), config.getYaw(), config.getPitch()));
+                    player.setVelocity(player.getLocation().getDirection().multiply(config.getPower()).setY(0.75));
+                    gamePlayer.setCanProjection(false);
+
+                    Bukkit.getScheduler().runTaskLater(CaptureTheFlag.getInstance(), new Runnable() {
+                        @Override
+                        public void run() {
+                            gamePlayer.setCanProjection(true);
+                        }
+                    }, 20 * 3);
+                } else {
+                    gamePlayer.sendMessage("§dCe bloc n'est pas un propulseur !");
+                }
+            }
         }
 
         if (lastPlayerLocation.containsKey(player)) {

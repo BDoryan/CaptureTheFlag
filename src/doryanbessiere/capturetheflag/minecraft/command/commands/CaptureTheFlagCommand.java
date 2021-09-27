@@ -10,6 +10,7 @@ import doryanbessiere.capturetheflag.minecraft.listener.listeners.LoggerListener
 import doryanbessiere.capturetheflag.minecraft.map.Map;
 import doryanbessiere.capturetheflag.minecraft.map.MapManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
+import doryanbessiere.capturetheflag.minecraft.projector.ProjectorConfig;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -20,10 +21,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 public class CaptureTheFlagCommand extends SimpleCommand {
+
+    public static final HashMap<GamePlayer, ProjectorConfig> projectorConfig = new HashMap<>();
 
     public CaptureTheFlagCommand() {
         super("ctf");
@@ -100,24 +104,28 @@ public class CaptureTheFlagCommand extends SimpleCommand {
             /**
              * - /ctf map list
              * - /ctf map wand
+             *
+             * - /ctf projector tool
+             *
+             * - /ctf settime <seconcds>
              */
             String arg1 = arguments[0];
             String arg2 = arguments[1];
-            if(arg1.equalsIgnoreCase("map")){
-                if(arg2.equalsIgnoreCase("list")){
+            if(arg1.equalsIgnoreCase("map")) {
+                if (arg2.equalsIgnoreCase("list")) {
                     ArrayList<Map> maps = MapManager.getMaps();
                     sender.sendMessage(Commons.lineSeparator("Liste des maps"));
                     sender.sendMessage("");
                     sender.sendMessage("§eNombre de map");
-                    sender.sendMessage("  §6» §c"+maps.size());
+                    sender.sendMessage("  §6» §c" + maps.size());
                     sender.sendMessage("");
                     sender.sendMessage("§eMaps:");
-                    for(Map map : maps){
-                        sender.sendMessage("  §6» §c"+map.getName());
+                    for (Map map : maps) {
+                        sender.sendMessage("  §6» §c" + map.getName());
                     }
                     sender.sendMessage("");
-                } else if(arg2.equalsIgnoreCase("wand")){
-                    if(!(sender instanceof Player)) {
+                } else if (arg2.equalsIgnoreCase("wand")) {
+                    if (!(sender instanceof Player)) {
                         CaptureTheFlag.sendMessage(sender, "§cVous devez être un joueur!");
                         return false;
                     }
@@ -126,6 +134,27 @@ public class CaptureTheFlagCommand extends SimpleCommand {
                     player.getInventory().addItem(GameManager.WAND);
                     CaptureTheFlag.sendMessage(player, "§fCette outil permet de sélectionner une zone");
                     CaptureTheFlag.sendMessage(player, "§8» §7Vous devez sélectionner un point A (clic-droit) et un point gauche B (clic-gauche)");
+                }
+            } else if(arg1.equalsIgnoreCase("projector")){
+                if(arg2.equalsIgnoreCase("tool")){
+                    if(!(sender instanceof Player)) {
+                        CaptureTheFlag.sendMessage(sender, "§cVous devez être un joueur!");
+                        return false;
+                    }
+
+                    Player player = (Player) sender;
+                    player.getInventory().addItem(GameManager.PROJECTOR_TOOL);
+                    CaptureTheFlag.sendMessage(player, "§aVous avez reçu l'outil pour les projecteurs.");
+                } else {
+                    CaptureTheFlag.sendMessage(sender, "§cCommande inconnue, essayer: §e/ctf help");
+                }
+            } else if(arg1.equalsIgnoreCase("settime")){
+                try {
+                    Integer seconds = Integer.valueOf(arg2);
+                    GameManager.getGameRunnable().setSeconds(seconds);
+                    CaptureTheFlag.sendMessage(sender, "§aLe temps restant est désormais défini.");
+                } catch (NumberFormatException exception){
+                    CaptureTheFlag.sendMessage(sender, "§cMerci de définir un nombre");
                 }
             } else {
                 CaptureTheFlag.sendMessage(sender, "§cCommande inconnue, essayer: §e/ctf help");
@@ -140,6 +169,8 @@ public class CaptureTheFlagCommand extends SimpleCommand {
              * - /ctf map setzone <blue|red>
              *
              * - /ctf setteam <player> <team>
+             *
+             * - /ctf projector setconfig <power>
              */
             String arg1 = arguments[0];
             String arg2 = arguments[1];
@@ -251,6 +282,25 @@ public class CaptureTheFlagCommand extends SimpleCommand {
                 } else {
                     CaptureTheFlag.sendMessage(sender, "§cCommande inconnue, essayer: §e/ctf help");
                 }
+            } else if (arg1.equalsIgnoreCase("projector")){
+                if(!(sender instanceof Player)){
+                    CaptureTheFlag.sendMessage(sender, "§cVous devez être un joueur !");
+                    return false;
+                }
+                Player player = (Player)sender;
+                GamePlayer gamePlayer = GameManager.getGamePlayer(player);
+
+                if(arg2.equalsIgnoreCase("setconfig")){
+                    try {
+                        Double power = Double.valueOf(arg3);
+                        projectorConfig.put(gamePlayer, new ProjectorConfig(player.getLocation().getYaw(), player.getLocation().getPitch(), power));
+                        gamePlayer.sendMessage("§aVotre configuration à bien été défini.");
+                    } catch (NumberFormatException exception){
+                        CaptureTheFlag.sendMessage(sender, "§cMerci de définir nombre entier ou décimal");
+                    }
+                } else {
+                    CaptureTheFlag.sendMessage(sender, "§cCommande inconnue, essayer: §e/ctf help");
+                }
             } else if (arg1.equalsIgnoreCase("setteam")){
                 Player target = Bukkit.getPlayer(arg2);
                 if(target == null){
@@ -324,6 +374,17 @@ public class CaptureTheFlagCommand extends SimpleCommand {
         sender.sendMessage("    §fPermet de vous donner l'outil qui permet de sélectionner une zone");
         sender.sendMessage("    §cAttention » §evous devez être sur le monde (la map).");
         sender.sendMessage(" ");
+        sender.sendMessage("  §7- /ctf projector §7config <power>");
+        sender.sendMessage("    §fPermet de définir les paramètre de propulsion, ");
+        sender.sendMessage("    §cAttention » §eLa direction où vous regardez lors de la commande sera la direction de propulsion.");
+        sender.sendMessage(" ");
+        sender.sendMessage("  §7- /ctf projector §7delete");
+        sender.sendMessage("    §fPermet de de retirer les blocs de cette sélection.");
+        sender.sendMessage(" ");
+        sender.sendMessage("  §7- /ctf projector §7tool");
+        sender.sendMessage("    §fPermet de d'enregister des nouveaux blocs projecteur");
+        sender.sendMessage("    §cAttention » §cvous devez avoir défini une configuration auparavant d'enregistrer un bloc.");
+        sender.sendMessage(" ");
         sender.sendMessage("  §7- /ctf map setspawn <blue|red>");
         sender.sendMessage("    §fPermet de définir l'emplacement d'apparition d'une équipe");
         sender.sendMessage("    §cAttention » §evous devez être sur le monde (la map).");
@@ -331,6 +392,9 @@ public class CaptureTheFlagCommand extends SimpleCommand {
         sender.sendMessage("  §7- /ctf map setflag <blue|red>");
         sender.sendMessage("    §fPermet de définir l'emplacement du drapeau d'une équipe");
         sender.sendMessage("    §cAttention » §evous devez être sur le monde (la map) et vous devez être placez sur le bloc de la bannière.");
+        sender.sendMessage(" ");
+        sender.sendMessage("  §7- /ctf settime §7<seconds>");
+        sender.sendMessage("    §fPermet de définir le temps restant §c(seulement en partie)");
         sender.sendMessage(" ");
         sender.sendMessage("  §7- /ctf forcestart");
         sender.sendMessage("    §fPermet de forcer le lancement de la partie");

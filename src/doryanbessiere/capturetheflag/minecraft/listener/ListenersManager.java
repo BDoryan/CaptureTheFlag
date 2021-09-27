@@ -22,5 +22,6 @@ public class ListenersManager {
         pluginManager.registerEvents(new PlayerDeathListener(), plugin);
         pluginManager.registerEvents(new PlayerDropItemListener(), plugin);
         pluginManager.registerEvents(new InventoryClickListener(), plugin);
+        pluginManager.registerEvents(new AsyncPlayerPreLoginListener(), plugin);
     }
 }

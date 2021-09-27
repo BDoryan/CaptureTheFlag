@@ -57,6 +57,7 @@ public class Flag {
         }
 
         this.carrier = gamePlayer;
+        this.carrier.saveHelmet();
         this.carrier.setFlag(this);
 
         if(!atBase()){
@@ -151,6 +152,7 @@ public class Flag {
         this.carrier.getPlayer().getEquipment().setHelmet(new ItemStack(Material.AIR));
         this.carrier.setFlag(null);
         this.carrier.getTeam().capture();
+        this.carrier.recoverHelmet();
         this.carrier = null;
 
         GameManager.getMap().getWorld().strikeLightningEffect(carrier.getTeam().getFlag().getLocation());

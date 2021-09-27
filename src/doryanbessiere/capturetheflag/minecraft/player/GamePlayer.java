@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -30,6 +31,9 @@ public class GamePlayer {
     private String name;
     private Compass compass;
     private Flag flag;
+
+    private ItemStack old_helmet;
+    private boolean canProjection = true;
 
     private ArrayList<Cuboid> areas = new ArrayList<>();
 
@@ -185,7 +189,19 @@ public class GamePlayer {
         player.getEquipment().setBoots(new ItemBuilder(Material.LEATHER_BOOTS).toItemStack());
 
         player.getInventory().setItem(0, new ItemBuilder(Material.IRON_SWORD).toItemStack());
+        player.teleport(GameManager.getMap().getSpawns().get(getTeam()));
         this.compass.giveCompass();
+    }
+
+    public void saveHelmet(){
+        old_helmet = player.getEquipment().getHelmet();
+    }
+
+    public void recoverHelmet(){
+        if(old_helmet != null) {
+            player.getEquipment().setHelmet(old_helmet);
+            old_helmet = null;
+        }
     }
 
     public Compass getCompass() {
@@ -255,5 +271,13 @@ public class GamePlayer {
 
     public void kill() {
         kills++;
+    }
+
+    public boolean canProjection() {
+        return canProjection;
+    }
+
+    public void setCanProjection(boolean canProjection) {
+        this.canProjection = canProjection;
     }
 }

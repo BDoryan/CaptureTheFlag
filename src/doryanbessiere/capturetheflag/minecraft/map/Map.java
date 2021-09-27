@@ -1,19 +1,19 @@
 package doryanbessiere.capturetheflag.minecraft.map;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
+import doryanbessiere.capturetheflag.minecraft.commons.Commons;
 import doryanbessiere.capturetheflag.minecraft.commons.config.ConfigurationUtils;
 import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
+import doryanbessiere.capturetheflag.minecraft.projector.ProjectorBlock;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import doryanbessiere.capturetheflag.minecraft.world.WorldManager;
 import org.bukkit.*;
-import org.bukkit.block.Banner;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Map {
@@ -23,6 +23,7 @@ public class Map {
     private HashMap<Team, Location> spawns = new HashMap<Team, Location>();
     private HashMap<Team, Location> flags = new HashMap<Team, Location>();
     private HashMap<Team, Cuboid> areas = new HashMap<Team, Cuboid>();
+    private ArrayList<ProjectorBlock> projectors = new ArrayList<ProjectorBlock>();
 
     public Map() {
     }
@@ -53,10 +54,48 @@ public class Map {
             map.areas.put(team, ConfigurationUtils.getArea(configuration, "maps."+name+"."+team.toString().toLowerCase()+".area.spawn"));
         }
 
+        if(configuration.contains("maps."+name+".projectors")){
+            for (String projector : configuration.getConfigurationSection("maps."+name+".projectors").getKeys(false)) {
+                map.projectors.add(ProjectorBlock.load(configuration, "maps."+name+".projectors."+projector));
+            }
+        } else {
+            map.projectors = new ArrayList<>();
+        }
+
         map.save();
         Logger.debug("Map.load("+name+");");
 
         return map;
+    }
+
+    public void addProjector(ProjectorBlock projectorBlock){
+        if(existsProjector(projectorBlock.getLocation())){
+            return;
+        }
+
+        projectors.add(projectorBlock);
+        projectorBlock.save();
+    }
+
+    public ProjectorBlock getProjector(Location location){
+        for(ProjectorBlock projectorBlock : projectors){
+            if(Commons.compareLocation(location, projectorBlock.getLocation()))
+                return projectorBlock;
+        }
+        return null;
+    }
+
+    public boolean existsProjector(Location location){
+        return getProjector(location) != null;
+    }
+
+    public void removeProjector(ProjectorBlock projectorBlock){
+        if(!existsProjector(projectorBlock.getLocation())){
+            return;
+        }
+
+        projectors.remove(projectorBlock);
+        projectorBlock.delete();
     }
 
     public void remove() {

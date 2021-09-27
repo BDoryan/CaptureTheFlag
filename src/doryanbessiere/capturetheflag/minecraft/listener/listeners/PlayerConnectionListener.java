@@ -1,6 +1,7 @@
 package doryanbessiere.capturetheflag.minecraft.listener.listeners;
 
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
+import doryanbessiere.capturetheflag.minecraft.commons.Commons;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
 import doryanbessiere.capturetheflag.minecraft.game.GameState;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;

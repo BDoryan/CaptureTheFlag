@@ -29,6 +29,7 @@ public class GameManager {
     private static GameRunnable gameRunnable;
 
     public static final ItemStack WAND = new ItemBuilder(Material.STICK).setName("§6Outil de zone §7(clic-droit ou clic-gauche)").toItemStack();
+    public static final ItemStack PROJECTOR_TOOL = new ItemBuilder(Material.STICK).setName("§6Outil de projecteur §7(clic-droit=§aajouter §7ou clic-gauche=§cretirer§7)").toItemStack();
 
     private static HashMap<Player, Location> position1 = new HashMap<>();
     private static HashMap<Player, Location> position2 = new HashMap<>();
@@ -50,13 +51,15 @@ public class GameManager {
         GamePlayer gamePlayer = new GamePlayer(player);
         players.put(gamePlayer.getUUIDString(), gamePlayer);
 
-        if(state == GameState.WAITING){
+        if(isState(GameState.WAITING)){
             /*
             Bukkit.broadcastMessage(CaptureTheFlag.getPrefix()+"§f"+player.getName()+" §aà rejoint la partie. §7(§f"+GameManager.getPlayers().size()+"§8/§f"+GameManager.MAX_PLAYERS+"§7).");
             if(GameManager.getPlayers().size() < GameManager.MIN_PLAYERS){
                 Bukkit.broadcastMessage(CaptureTheFlag.getPrefix()+"§7Il faut minimum "+MIN_PLAYERS+" joueurs afin que la partie se lance..");
             }*/
             lobby(gamePlayer);
+        } else if (isState(GameState.INGAME)){
+            joinGame(gamePlayer);
         }
     }
 
@@ -96,6 +99,7 @@ public class GameManager {
     }
 
     public static void finish(Team team) {
+        state = GameState.FINISH;
         for(Team t : Team.values()){
             if(t == team){
                 t.getPlayers().forEach((gamePlayer) -> {
@@ -138,19 +142,15 @@ public class GameManager {
         Runnable runnable = new Runnable(){
             @Override
             public void run() {
-                randomTeam();
 
-                for(Team team : Team.values()){
-                    team.getPlayers().forEach(player -> player.getPlayer().teleport(map.getSpawns().get(team)));
-                }
-                state = GameState.INGAME;
+                randomTeam();
                 getPlayers().forEach(gamePlayer -> {
-                    Player player = gamePlayer.getPlayer();
-                    player.setGameMode(GameMode.SURVIVAL);
                     gamePlayer.spawn();
                 });
+
                 gameRunnable = new GameRunnable();
                 gameRunnable.start();
+                state = GameState.INGAME;
             }
         };
 
@@ -163,12 +163,39 @@ public class GameManager {
         }
     }
 
+    public static String canJoin(){
+        if(getPlayers().size() >= 40){
+            return "§cLa partie est déjà complête !";
+        }
+        if(isState(GameState.FINISH)){
+            return "§cLa partie est terminée !";
+        }
+
+        return null;
+    }
+
+    public static void joinGame(GamePlayer gamePlayer){
+        Team.logicTeam(gamePlayer);
+        gamePlayer.spawn();
+    }
+
     /**
      * This method allows to apply a random team to the players
      */
     public static void randomTeam(){
-        for(GamePlayer player : getPlayers()){
-            Team.logicTeam(player);
+        List<GamePlayer> players = new ArrayList<>();
+        players.addAll(getPlayers());
+
+        if(players.size() == 1){
+            Team.logicTeam(players.get(0));
+        } else if (players.size() > 1){
+            GamePlayer player = null;
+            Random random = new Random();
+            while(true){
+                player = players.get(random.nextInt(players.size()) - 1);
+                Team.logicTeam(player);
+                players.remove(player);
+            }
         }
     }
 
