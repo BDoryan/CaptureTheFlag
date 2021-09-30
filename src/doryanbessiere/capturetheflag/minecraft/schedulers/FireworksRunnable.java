@@ -36,9 +36,8 @@ public class FireworksRunnable implements Runnable {
 
     @Override
     public void run() {
-        FileConfiguration configuration = CaptureTheFlag.getConfiguration();
-        for (String locationPath : configuration.getConfigurationSection("fireworks").getKeys(false)) {
-            Location location = ConfigurationUtils.getLocation(configuration, "fireworks."+locationPath);
+        for (Location location : GameManager.getMap().getSpawns().values()) {
+            location = location.add(0, 10, 0);
             Firework firework = location.getWorld().spawn(location, Firework.class);
             FireworkMeta fm = firework.getFireworkMeta();
             Random random = new Random();

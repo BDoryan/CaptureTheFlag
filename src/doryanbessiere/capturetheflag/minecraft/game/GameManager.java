@@ -106,6 +106,7 @@ public class GameManager {
 
     public static void finish(Team team) {
         state = GameState.FINISH;
+        winner = team;
         for(Team t : Team.values()){
             if(t == team){
                 t.getPlayers().forEach((gamePlayer) -> {
@@ -124,13 +125,11 @@ public class GameManager {
                 });
             }
         }
-        getPlayers().forEach(gamePlayer -> {
-            lobby(gamePlayer);
+        Bukkit.getWorld(map.getName()).setTime(15000);
+        getPlayers().forEach(player -> {
+            player.finish();
         });
-        if(team != null){
-            Bukkit.getWorlds().get(0).setTime(15000);
-            new FireworksRunnable(team).start();
-        }
+        new FireworksRunnable(team).start();
     }
 
     /**
@@ -248,5 +247,11 @@ public class GameManager {
 
     public static GameRunnable getGameRunnable() {
         return gameRunnable;
+    }
+
+    private static Team winner;
+
+    public static Team getWinner() {
+        return winner;
     }
 }

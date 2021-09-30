@@ -5,14 +5,15 @@ import doryanbessiere.capturetheflag.minecraft.command.commands.CaptureTheFlagCo
 import doryanbessiere.capturetheflag.minecraft.compass.Compass;
 import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
+import doryanbessiere.capturetheflag.minecraft.game.GameState;
 import doryanbessiere.capturetheflag.minecraft.map.Map;
 import doryanbessiere.capturetheflag.minecraft.map.MapManager;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import doryanbessiere.capturetheflag.minecraft.projector.ProjectorBlock;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +21,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
+
+import java.util.Random;
 
 public class PlayerInteractListener implements Listener {
 
@@ -35,6 +39,27 @@ public class PlayerInteractListener implements Listener {
             gamePlayer.sendMessage("§7Vous êtes désormais en mode §f"+compass.getCompassMode().toString().toLowerCase()+"§7 !");
         }
         Block block = event.getClickedBlock();
+
+        if(GameManager.isState(GameState.FINISH)){
+            if(itemStack.getType() == Material.FIREWORK){
+                Location location = block != null ? block.getLocation() : player.getLocation().add(0, 1, 0);
+                Team winner = GameManager.getWinner();
+                Firework firework = location.getWorld().spawn(location, Firework.class);
+                FireworkMeta fm = firework.getFireworkMeta();
+                Random random = new Random();
+                fm.addEffect(FireworkEffect.builder().flicker(false).trail(false).with(FireworkEffect.Type.values()[random.nextInt(FireworkEffect.Type.values().length - 1)])
+                        .withColor(winner == null ? Color.GRAY : winner.getColor(), Color.WHITE).build());
+                fm.setPower(random.nextInt(10));
+                firework.setFireworkMeta(fm);
+
+                Bukkit.getScheduler().runTaskLater(CaptureTheFlag.getInstance(), new Runnable() {
+                    @Override
+                    public void run() {
+                        firework.detonate();
+                    }
+                }, random.nextInt(160));
+            }
+        }
 
         if(itemStack != null &&
                 itemStack.hasItemMeta() && block != null){

@@ -34,16 +34,15 @@ public class GriefCommons {
 
         org.bukkit.block.Block minecraftBlock = block.getLocation().getBlock();
         minecraftBlock.setType(block.getType());
-        minecraftBlock.getState().setData(block.getState().getData());
-        minecraftBlock.getState().update();
+        block.getState().update(true);
 
         blocks.remove(block);
     }
 
     private static class Block {
 
-        private Material type;
         private Location location;
+        private Material type;
         private BlockState state;
 
         public Block(Material type, Location location, BlockState state) {

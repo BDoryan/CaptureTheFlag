@@ -49,18 +49,6 @@ public class CaptureTheFlagCommand extends SimpleCommand {
                 GameManager.start(true);
             } else if (arguments[0].equalsIgnoreCase("stop")){
                 GameManager.finish(null);
-            } else if (arguments[0].equalsIgnoreCase("addfirework")){
-                if(!(sender instanceof Player)) {
-                    CaptureTheFlag.sendMessage(sender, "§cVous devez être un joueur!");
-                    return false;
-                }
-
-                Player player = (Player) sender;
-
-                FileConfiguration configuration = CaptureTheFlag.getConfiguration();
-                ConfigurationUtils.setLocation(configuration, player.getLocation(), "fireworks."+ UUID.randomUUID());
-                CaptureTheFlag.sendMessage(player, "§aVous avez ajouter un nouvelle emplacement d'apparition de feu d'artifice.");
-                CaptureTheFlag.saveConfiguration();
             } else if (arguments[0].equalsIgnoreCase("setlobby")){
                 if(sender instanceof Player){
                     Player player = (Player) sender;
@@ -404,9 +392,6 @@ public class CaptureTheFlagCommand extends SimpleCommand {
         sender.sendMessage(" ");
         sender.sendMessage("  §7- /ctf setlobby");
         sender.sendMessage("    §fPermet de définir le point d'apparition du lobby");
-        sender.sendMessage(" ");
-        sender.sendMessage("  §7- /ctf addfirework");
-        sender.sendMessage("    §fPermet d'ajouter l'emplacement d'apparition des feux d'artifices");
         sender.sendMessage(" ");
         sender.sendMessage("  §7- /ctf getlobby");
         sender.sendMessage("    §fPermet de vous téléporter au point d'apparition");

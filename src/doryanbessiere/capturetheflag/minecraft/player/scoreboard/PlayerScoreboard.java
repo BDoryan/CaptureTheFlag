@@ -72,7 +72,7 @@ public class PlayerScoreboard extends SimpleScoreboard {
             }
             lines.put(2, "§f§8§m-------------------");
             lines.put(1, "§7play.enantia.fr");
-        } else if(GameManager.isState(GameState.INGAME)){
+        } else if(GameManager.isState(GameState.INGAME) || GameManager.isState(GameState.FINISH)){
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
             String time = simpleDateFormat.format(new Date(GameManager.getGameRunnable().getSeconds() * 1000));
 
@@ -100,8 +100,6 @@ public class PlayerScoreboard extends SimpleScoreboard {
             lines.put(3, "§eMap §6» §c"+GameManager.getMap().getName());
             lines.put(2, "§f§8§m-------------------");
             lines.put(1, "§7play.enantia.fr");
-        } else {
-
         }
 
         /**

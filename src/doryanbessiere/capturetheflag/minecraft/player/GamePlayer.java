@@ -203,6 +203,18 @@ public class GamePlayer {
         this.compass.giveCompass();
     }
 
+    public void finish(){
+        if(!hasRespawn){
+            Bukkit.getScheduler().cancelTask(respawnTask);
+            spawn();
+        }
+
+        clean();
+        player.setGameMode(GameMode.CREATIVE);
+        player.getInventory().addItem(new ItemStack(Material.FIREWORK));
+        player.updateInventory();;
+    }
+
     public void saveHelmet(){
         old_helmet = player.getEquipment().getHelmet();
     }
