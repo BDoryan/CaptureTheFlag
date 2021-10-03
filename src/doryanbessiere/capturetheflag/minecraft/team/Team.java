@@ -57,7 +57,11 @@ public enum Team {
     }
 
     public org.bukkit.scoreboard.Team getScoreboardTeam(GamePlayer player){
-        String teamName = toString().toLowerCase();
+        return getScoreboardTeam(this, player);
+    }
+
+    public org.bukkit.scoreboard.Team getScoreboardTeam(Team team, GamePlayer player){
+        String teamName = team.toString().toLowerCase();
 
         Scoreboard scoreboard = player.getPlayer().getScoreboard();
         org.bukkit.scoreboard.Team scoreboardTeam = scoreboard.getTeam(teamName);
@@ -66,7 +70,7 @@ public enum Team {
             scoreboard.registerNewTeam(teamName);
             scoreboardTeam = scoreboard.getTeam(teamName);
             scoreboardTeam.setNameTagVisibility(NameTagVisibility.ALWAYS);
-            scoreboardTeam.setPrefix(getNameColor());
+            scoreboardTeam.setPrefix(team.getNameColor());
         }
         return scoreboardTeam;
     }
@@ -99,6 +103,13 @@ public enum Team {
             scoreboardTeam.addPlayer(player.getPlayer());
         }
         player.setTeam(this);
+    }
+
+    public void init(GamePlayer player){
+        for(GamePlayer p : GameManager.getPlayers()){
+            org.bukkit.scoreboard.Team scoreboardTeam = getScoreboardTeam(p.getTeam(), player);
+            scoreboardTeam.addPlayer(p.getPlayer());
+        }
     }
 
     public boolean containsPlayer(GamePlayer player){

@@ -21,7 +21,7 @@ import java.util.*;
 
 public class GameManager {
 
-    public static int MIN_PLAYERS = 2;
+    public static int MIN_PLAYERS = 6;
     public static int MAX_PLAYERS = 40;
 
     private static HashMap<String, GamePlayer> players = new HashMap<>();
@@ -190,6 +190,7 @@ public class GameManager {
 
     public static void joinGame(GamePlayer gamePlayer){
         Team.logicTeam(gamePlayer);
+        gamePlayer.getTeam().init(gamePlayer);
         gamePlayer.spawn();
     }
 

@@ -4,6 +4,7 @@ import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.cuboid.Cuboid;
 import doryanbessiere.capturetheflag.minecraft.commons.items.ItemBuilder;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
+import doryanbessiere.capturetheflag.minecraft.commons.particle.ParticleEffect;
 import doryanbessiere.capturetheflag.minecraft.compass.Compass;
 import doryanbessiere.capturetheflag.minecraft.flag.Flag;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
@@ -183,6 +184,10 @@ public class GamePlayer {
     public void death() {
         if(flag != null)
             flag.drop();
+
+        ArrayList<Player> players = new ArrayList<>();
+        players.addAll(Bukkit.getOnlinePlayers());
+        ParticleEffect.TOWN_AURA.display(0.25f, 0.5f, 0.25f, 100, 2000, getPlayer().getLocation().add(0, 1, 0), players);
 
         clean();
 

@@ -6,6 +6,7 @@ import doryanbessiere.capturetheflag.minecraft.commons.grief.GriefCommons;
 import doryanbessiere.capturetheflag.minecraft.commons.items.ItemBuilder;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
+import doryanbessiere.capturetheflag.minecraft.game.GameState;
 import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.*;
@@ -96,7 +97,8 @@ public class Flag {
 
     public void dropInVoid(){
         this.location = null;
-        backToBase();
+        backToBase(true);
+        CaptureTheFlag.broadcast("§dLe drapeau "+team.getNameColor()+team.getName()+" §da été perdu dans le Void.");
     }
 
     public void drop(){
@@ -139,7 +141,7 @@ public class Flag {
         task = Bukkit.getScheduler().runTaskLater(CaptureTheFlag.getInstance(), new Runnable() {
             @Override
             public void run() {
-                backToBase();
+                backToBase(false);
             }
         }, 20 * seconds);
 
@@ -186,7 +188,7 @@ public class Flag {
         CaptureTheFlag.broadcast("§c"+carrier.getTeam().getNameColor()+carrier.getName()+" §7a ramené le drapeau "+team.getNameColor()+team.getName()+"§7 dans son camp!");
     }
 
-    public void backToBase(){
+    public void backToBase(boolean byVoid){
         Block bannerBlock = base.getBlock();
         Banner bannerState = (Banner) bannerBlock.getState();
         bannerState.setBaseColor(team.getDyeColor());
@@ -198,6 +200,7 @@ public class Flag {
         }
 
         location = base;
+        if(!byVoid)
         CaptureTheFlag.broadcast("§dLe drapeau "+team.getNameColor()+team.getName()+" §da été reset.");
     }
 
@@ -218,6 +221,7 @@ public class Flag {
     }
 
     public static void interact(GamePlayer gamePlayer, Location to){
+        if(!GameManager.isState(GameState.INGAME))return;
         for(Team team : Team.values()) {
             Flag flag = team.getFlag();
 
