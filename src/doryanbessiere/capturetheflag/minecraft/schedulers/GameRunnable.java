@@ -3,8 +3,10 @@ package doryanbessiere.capturetheflag.minecraft.schedulers;
 import doryanbessiere.capturetheflag.minecraft.CaptureTheFlag;
 import doryanbessiere.capturetheflag.minecraft.commons.logger.Logger;
 import doryanbessiere.capturetheflag.minecraft.game.GameManager;
+import doryanbessiere.capturetheflag.minecraft.player.GamePlayer;
 import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 
 public class GameRunnable implements Runnable {
 

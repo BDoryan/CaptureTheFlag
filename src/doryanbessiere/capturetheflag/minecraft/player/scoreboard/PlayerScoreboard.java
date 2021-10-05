@@ -24,9 +24,9 @@ public class PlayerScoreboard extends SimpleScoreboard {
     private GamePlayer player;
 
     String[] titles = new String[] {
-        "§7§lCaptureTheFlag",
-        "§9§lCaptureTheFlag",
-        "§c§lCaptureTheFlag",
+        "§7§lCapture The Flag",
+        "§9§lCapture The Flag",
+        "§c§lCapture The Flag",
     };
 
     public PlayerScoreboard(GamePlayer player) {

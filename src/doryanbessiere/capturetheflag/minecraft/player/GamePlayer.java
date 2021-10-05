@@ -13,8 +13,14 @@ import doryanbessiere.capturetheflag.minecraft.team.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -185,9 +191,28 @@ public class GamePlayer {
         if(flag != null)
             flag.drop();
 
-        ArrayList<Player> players = new ArrayList<>();
-        players.addAll(Bukkit.getOnlinePlayers());
-        ParticleEffect.TOWN_AURA.display(0.25f, 0.5f, 0.25f, 100, 2000, getPlayer().getLocation().add(0, 1, 0), players);
+        /*
+        * ArrayList<Player> players = new ArrayList<>();
+        * players.addAll(Bukkit.getOnlinePlayers());
+        * ParticleEffect.HEART.display(0.25f, 0.5f, 0.25f, 0, 5, getPlayer().getLocation().add(0, 1, 0), players);
+         */
+
+        World world = player.getWorld();
+        Entity entity = world.spawnEntity(player.getLocation(), EntityType.SKELETON);
+        ((Skeleton) entity).damage(100);
+        Bukkit.getScheduler().runTaskTimer(CaptureTheFlag.getInstance(), new BukkitRunnable() {
+            int ticks = 0;
+            @Override
+            public void run() {
+                if(ticks >= 20){
+                    cancel();
+                    return;
+                }
+                entity.setFireTicks(0);
+                ticks++;
+            }
+        }, 0, 1);
+        entity.setFireTicks(0);
 
         clean();
 
@@ -205,6 +230,10 @@ public class GamePlayer {
 
         player.getInventory().setItem(0, new ItemBuilder(Material.IRON_SWORD).toItemStack());
         player.teleport(GameManager.getMap().getSpawns().get(getTeam()));
+
+        // Pour mettre à jour la vie au dessus du joueur
+        player.setHealth(19);
+        player.setHealth(20);
         this.compass.giveCompass();
     }
 
