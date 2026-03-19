@@ -1,54 +1,50 @@
 # CaptureTheFlag
 
-> ⚠️ **Disclaimer** : Ce projet est un ancien développement personnellement. Il a été récemment mis à jour et rendu public. Il remonte à cette époque et n'a pas eu de maintenance active depuis.
+> ⚠️ **Disclaimer**: This project is an old personal development. It has recently been updated and made public. It dates back to that time and has not been actively maintained since.
 
-Plugin Spigot/Bukkit de type Capture The Flag pour Minecraft 1.8.8. Il propose un mode de jeu équipe contre équipe avec drapeau, boussole et gestion de parties.
+Spigot/Bukkit Capture The Flag plugin for Minecraft 1.8.8. It provides a team-vs-team game mode with flags, compass tracking, and match management.
 
-## Fonctionnalités
+## Features
 
-- Mode CTF avec 2 équipes maximum.
-- Chargement de maps et positions (spawn, drapeau, lobby).
-- Commandes dédiées au jeu et au chat d'équipe.
-- Scoreboard et animations.
+* CTF mode with up to 2 teams.
+* Map and position loading (spawn, flag, lobby).
+* Dedicated commands for gameplay and team chat.
+* Scoreboard and animations.
 
-## Prérequis
+## Prerequisites
 
-- Java 8
-- Serveur Spigot 1.8.8 (ou Bukkit compatible)
-- Maven (pour compiler)
+* Java 8
+* Spigot 1.8.8 server (or compatible Bukkit)
+* Maven (for building)
 
 ## Installation
 
-1. Compile le plugin.
-2. Dépose le fichier jar dans le dossier `plugins/` de ton serveur.
-3. Démarre le serveur pour générer la configuration par défaut.
+1. Build the plugin.
+2. Place the jar file into your server’s `plugins/` folder.
+3. Start the server to generate the default configuration.
 
-## Compilation
+## Build
 
 ```bash
 mvn clean package
 ```
 
-Le jar final est généré dans `target/`.
+The final jar is generated in the `target/` directory.
 
 ## Configuration
 
-La configuration principale se trouve dans `src/config.yml` et est copiée au premier lancement. Exemple :
+The main configuration is located in `src/config.yml` and is copied on first launch. Example:
 
-- `locations.lobby` : position du lobby.
-- `maps.<nom>.red/blue.spawn` : spawn par équipe.
-- `maps.<nom>.red/blue.flag` : position du drapeau.
+* `locations.lobby`: lobby position
+* `maps.<name>.red/blue.spawn`: team spawn locations
+* `maps.<name>.red/blue.flag`: flag positions
 
-## Commandes
+## Commands
 
-- `/ctf` : commandes principales du mode CTF.
-- `/tc` : chat d'équipe.
+* `/ctf`: main CTF commands
+* `/tc`: team chat
 
-## Développement
+## Development
 
-- Main class : `doryanbessiere.capturetheflag.minecraft.CaptureTheFlag`
-- Plugin YAML : `src/plugin.yml`
-
-## Licence
-
-Aucune licence n'est indiquée dans le dépôt. Ajoute-en une si besoin.
+* Main class: `doryanbessiere.capturetheflag.minecraft.CaptureTheFlag`
+* Plugin YAML: `src/plugin.yml`
